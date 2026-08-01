@@ -19,104 +19,91 @@ SCREENSHOTS_DIR = ROOT / "output" / "screenshots"
 # Angles chosen for best visual presentation — lower/side angles where
 # buildings look 3D, higher angles for layouts (track, halls).
 SHOTS = [
-    # ── Hero shots ──
+    # Using the viewer's built-in "front" camera presets —
+    # straight-on, eye-level views of each building's main facade.
     {
         "name": "01_plaza_sundial",
         "landmark": "plaza",
         "label": "Red Bird Plaza",
-        # Mid-low angle from SE: shows sundial height + academic arc facade behind
-        "cam_pos": [35, -45, 58],
-        "cam_tgt": [0, -88, 45],
+        "cam_pos": [0, -30, 52],    # front: looking north from south
+        "cam_tgt": [0, -88, 44],
     },
     {
         "name": "02_shaw_auditorium",
         "landmark": "shaw",
         "label": "Shaw Auditorium",
-        # 3/4 angle from SW, lower elevation to see 3-ring stacking
-        "cam_pos": [160, -140, 35],
-        "cam_tgt": [120, -190, 12],
+        "cam_pos": [120, -140, 25], # front: looking south from north
+        "cam_tgt": [120, -190, 10],
     },
     {
         "name": "03_academic_arc",
         "landmark": "academic",
         "label": "Academic Arc",
-        # From the south, eye-level looking north at the crescent facade
-        "cam_pos": [0, -55, 56],
+        "cam_pos": [0, -50, 56],    # front: looking north at crescent facade
         "cam_tgt": [0, 0, 56],
     },
     {
         "name": "04_atrium",
         "landmark": "atrium",
         "label": "Jockey Club Atrium",
-        # Mid angle from SE to show the glass skylight + grand entrance
-        "cam_pos": [20, -60, 62],
-        "cam_tgt": [0, -38, 50],
+        "cam_pos": [0, -95, 50],    # front: looking north at grand entrance
+        "cam_tgt": [0, -38, 48],
     },
-
-    # ── Supporting landmarks ──
     {
         "name": "05_north_gate",
         "landmark": "gate",
         "label": "North Gate",
-        # Lower angle from south looking north at pillars + roundabout
-        "cam_pos": [30, 85, 50],
+        "cam_pos": [0, 100, 48],    # front: looking south at pillars
         "cam_tgt": [0, 60, 42],
     },
     {
         "name": "06_library",
         "landmark": "library",
         "label": "University Library",
-        # 3/4 angle from SE, slightly above
-        "cam_pos": [80, -30, 72],
+        "cam_pos": [40, -60, 52],   # front: looking north at library
         "cam_tgt": [40, 10, 48],
     },
     {
         "name": "07_lsk_business",
         "landmark": "lsk",
         "label": "LSK Business Building",
-        # Lower angle from SW to show building volume
-        "cam_pos": [-20, -80, 60],
+        "cam_pos": [-50, -20, 52],  # front: looking south at LSK
         "cam_tgt": [-50, -50, 44],
     },
     {
         "name": "08_student_halls",
         "landmark": "halls",
         "label": "Student Halls",
-        # High angle from SE to show terraced towers cascading down
-        "cam_pos": [100, -70, 60],
+        "cam_pos": [65, -50, 40],   # front: looking south at residence towers
         "cam_tgt": [65, -135, 20],
     },
     {
         "name": "09_track_field",
         "landmark": "track",
         "label": "Sports Track & Field",
-        # High angle to show full oval + soccer field
-        "cam_pos": [95, -75, 25],
+        "cam_pos": [85, -220, 15],  # front: looking north at track
         "cam_tgt": [85, -155, 2],
     },
     {
         "name": "10_pool",
         "landmark": "pool",
         "label": "Swimming Pool",
-        # Above slightly to show pool lanes + diving well
-        "cam_pos": [100, -110, 22],
+        "cam_pos": [85, -110, 16],  # front: looking south at pool
         "cam_tgt": [85, -138, 8],
     },
     {
         "name": "11_chinese_garden",
         "landmark": "garden",
         "label": "Chinese Garden",
-        # Close-up, lower angle to show pavilion + pond + moon gate
-        "cam_pos": [-40, 55, 42],
-        "cam_tgt": [-65, 35, 38],
+        "cam_pos": [-65, 60, 46],   # front: looking north at pavilion
+        "cam_tgt": [-65, 35, 40],
     },
     {
         "name": "12_tianyi_spring",
         "landmark": "spring",
         "label": "Tianyi Spring",
-        # Close-up of the fountain
-        "cam_pos": [10, -45, 40],
-        "cam_tgt": [0, -55, 36],
+        "cam_pos": [0, -70, 42],    # front: looking north at fountain
+        "cam_tgt": [0, -55, 38],
     },
 ]
 
