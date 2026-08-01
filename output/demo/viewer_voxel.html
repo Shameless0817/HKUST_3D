@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HKUST Voxel Campus — 香港科技大學 體素方塊</title>
+<style>
+  :root {
+    --bg: #0d0f12; --glass: rgba(22,24,30,0.82); --glass-hover: rgba(30,34,42,0.9);
+    --border: rgba(255,255,255,0.08); --border-active: rgba(77,166,255,0.35);
+    --text: #8890a0; --text-bright: #dde0e6;
+    --accent: #5baeff; --gold: #e5c07b; --red: #e06c75; --green: #8ebf7a;
+    --radius: 12px; --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: #0d0f12; font-family: var(--font);
+    overflow: hidden; height: 100vh; width: 100vw; color: var(--text);
+    user-select: none; -webkit-user-select: none;
+  }
+  canvas { display: block; position: relative; z-index: 1; }
+
+  /* ── Gradient sky overlay ── */
+  #sky {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 35%, #1a2a3a 0%, #0d1117 55%, #080b0e 100%);
+  }
+
+  /* ── Top bar ── */
+  #topbar {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    z-index: 100; display: flex; gap: 3px;
+    background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 5px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  #topbar button {
+    padding: 10px 18px; border: 1px solid transparent; border-radius: 9px;
+    background: transparent; color: var(--text); cursor: pointer;
+    font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.25s;
+    font-family: var(--font); letter-spacing: 0.3px;
+  }
+  #topbar button:hover { background: rgba(255,255,255,0.05); color: var(--text-bright); }
+  #topbar button.active {
+    background: rgba(77,166,255,0.12); color: var(--accent);
+    border-color: var(--border-active); box-shadow: 0 0 16px rgba(77,166,255,0.1);
+  }
+
+  /* ── Right panel ── */
+  #panel {
+    position: fixed; right: 16px; top: 96px; z-index: 100;
+    display: flex; flex-direction: column; gap: 8px; width: 205px;
+  }
+  .pgroup {
+    background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 13px 15px; box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+    transition: all 0.3s;
+  }
+  .pgroup h3 {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text); margin-bottom: 9px; font-weight: 600;
+  }
+  .poi-btn {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 8px 10px; margin-bottom: 2px; border: none; border-radius: 7px;
+    background: transparent; color: var(--text); cursor: pointer;
+    font-size: 12px; text-align: left; transition: all 0.2s; font-family: var(--font);
+  }
+  .poi-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-bright); }
+  .poi-btn.active { background: rgba(77,166,255,0.1); color: var(--accent); }
+  .poi-marker {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  /* ── Photo card ── */
+  .photo-card {
+    position: fixed; z-index: 90;
+    background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+    width: 280px; opacity: 0; transform: translateY(12px) scale(0.96);
+    transition: opacity 0.35s, transform 0.35s; pointer-events: auto;
+  }
+  .photo-card.visible { opacity: 1; transform: translateY(0) scale(1); }
+  .photo-card img {
+    width: 100%; height: 170px; object-fit: cover; display: block; background: #1a1d24;
+  }
+  .photo-card .card-body { padding: 14px 16px; }
+  .photo-card .card-title { font-size: 14px; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+  .photo-card .card-desc { font-size: 11px; color: var(--text); line-height: 1.55; }
+  .photo-card .close-btn {
+    position: absolute; top: 10px; right: 10px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.1); color: #fff;
+    cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .photo-card .close-btn:hover { background: rgba(0,0,0,0.8); border-color: rgba(255,255,255,0.2); }
+
+  /* ── Marker dot overlay ── */
+  .marker-dot {
+    position: fixed; z-index: 80; pointer-events: auto; cursor: pointer;
+    width: 14px; height: 14px; border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 16px 3px currentColor;
+    transition: opacity 0.3s, transform 0.2s;
+  }
+  .marker-dot::after {
+    content: ''; position: absolute; inset: -5px; border-radius: 50%;
+    border: 2px solid currentColor; opacity: 0.5;
+    animation: pulse-ring 2.5s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.7); opacity: 0.7; }
+    100% { transform: scale(2.8); opacity: 0; }
+  }
+  .marker-dot:hover { transform: translate(-50%, -50%) scale(1.4); }
+
+  /* ── Toggle row ── */
+  .tg-row { display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; padding:3px 0; color: var(--text); }
+  .tg-row input { accent-color: var(--accent); }
+
+  /* ── Bottom bar ── */
+  #infobar {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    z-index: 100;
+    background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 7px 18px; font-size: 11px; color: var(--text);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    display: flex; gap: 18px; align-items: center;
+  }
+  #infobar .st { display:flex; gap:5px; align-items:center; }
+  #infobar .st-l { color:#5c6370; }
+  #infobar .st-v { color:var(--text-bright); font-weight:500; }
+
+  /* ── Loading ── */
+  #loading {
+    position: fixed; inset:0; z-index:200;
+    background: var(--bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition: opacity 0.5s;
+  }
+  #loading.hidden { opacity:0; pointer-events:none; }
+  .spinner {
+    width:38px; height:38px; border:3px solid rgba(255,255,255,0.08);
+    border-top-color:var(--accent); border-radius:50%;
+    animation:sp 0.8s linear infinite; margin-bottom:16px;
+  }
+  @keyframes sp { to{transform:rotate(360deg);} }
+  #loading-msg { font-size:14px; color:var(--text); font-family:var(--font); }
+
+  /* ── Welcome overlay (first visit) ── */
+  #hint {
+    position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
+    z-index: 99; font-size: 12px; color: rgba(255,255,255,0.35);
+    pointer-events: none; transition: opacity 1.5s;
+    font-family: var(--font); letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div id="sky"></div>
+<div id="loading"><div class="spinner"></div><div id="loading-msg">載入模型中...</div><div id="load-bar-bg" style="width:200px;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:12px;overflow:hidden"><div id="load-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.3s"></div></div></div>
+<div id="hint">🖱 拖拽旋轉 &nbsp;|&nbsp; 滾輪縮放 &nbsp;|&nbsp; 右鍵平移 &nbsp;|&nbsp; Ctrl+點擊 查看坐標</div>
+
+<!-- Top bar -->
+<div id="topbar">
+  <button class="active" data-model="plaza">🔴 紅鳥廣場</button>
+  <button data-model="academic">🏛️ 學術樓</button>
+  <button data-model="atrium">🏫 賽馬會大堂</button>
+  <button data-model="cyt">🏗️ 鄭裕彤樓</button>
+  <button data-model="library">📚 圖書館</button>
+  <button data-model="lsk">🏢 商學大樓</button>
+  <button data-model="halls">🏘️ 學生宿舍</button>
+  <button data-model="track">🏃 運動場</button>
+  <button data-model="pool">🏊 游泳池</button>
+  <button data-model="shaw">🎭 逸夫演藝</button>
+  <button data-model="gate">🚪 北閘</button>
+  <button data-model="garden">🏯 中式花園</button>
+  <button data-model="spring">⛲ 天一泉</button>
+      <span style="border-left:1px solid rgba(255,255,255,0.12);margin:4px 6px"></span>
+      <span style="border-left:1px solid rgba(255,255,255,0.12);margin:4px 6px"></span>
+      <button id="btn-front" title="正面視角">👁</button>
+      <button id="btn-top" title="俯視">🔽</button>
+      <button id="btn-overview" title="全景俯瞰">🌐</button>
+      <button data-model="campus" style="color:#e5c07b;border-color:rgba(229,192,123,0.3)">🏫 全景校園</button>
+</div>
+
+<!-- Right panel -->
+<div id="panel">
+  <div class="pgroup">
+    <h3>🎯 景點</h3>
+    <div id="poi-list"></div>
+  </div>
+  <div class="pgroup">
+    <h3>⚙️ 設定</h3>
+    <label class="tg-row"><input type="checkbox" id="tg-annot" checked> 顯示標註</label>
+    <label class="tg-row"><input type="checkbox" id="tg-rotate"> 自動旋轉</label>
+    <label class="tg-row"><input type="checkbox" id="tg-wire"> 線框模式</label>
+  </div>
+</div>
+
+<div id="infobar">
+  <div class="st"><span class="st-l">模型</span><span id="st-model" class="st-v">紅鳥廣場</span></div>
+  <div class="st"><span class="st-l">景點</span><span id="st-poi" class="st-v">—</span></div>
+  <div class="st"><span class="st-l">分類</span><span id="st-cats" class="st-v"></span></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ═══════════════════════════════════════════════════════════
+//  LANDMARKS DATA
+// ═══════════════════════════════════════════════════════════
+const LANDMARKS = {
+  plaza: {
+    file: 'voxel_plaza.json', name: '紅鳥廣場', icon: '🔴',
+    defaultCam: { pos: [45, -60, 70], tgt: [0, -88, 44] },
+    overview: { pos: [60, -35, 90], tgt: [0, -88, 44] },
+    front:    { pos: [0, -30, 52], tgt: [0, -88, 44] },
+    top:      { pos: [0, -88, 115], tgt: [0, -88, 44] },
+    pois: [
+      { id:'sundial', label:'紅鳥日晷', pos:[0,-88,47], color:'#e5c07b',
+        title:'紅鳥日晷 (Circle of Time)',
+        desc:'8.5米高紅色火焰雕塑，坐落於紅鳥廣場正中心。日晷+紅鳥造型，科大最具標誌性的地標。',
+        photos:[]},
+      { id:'plaza', label:'紅鳥廣場', pos:[8,-80,38], color:'#e06c75',
+        title:'紅鳥廣場 (Red Bird Square)',
+        desc:'22米半徑圓形廣場，灰石同心圓鋪地。位於學術樓南側，前方可望清水灣。',
+        photos:[]},
+      { id:'acad', label:'學術樓立面', pos:[0,-55,58], color:'#61afef',
+        title:'學術樓弧形立面',
+        desc:'從廣場北望可見標誌性的7層弧形玻璃幕牆環抱。', photos:[]},
+    ],
+  },
+  academic: {
+    file: 'voxel_academic.json', name: '學術樓', icon: '🏛️',
+    defaultCam: { pos: [60, 50, 78], tgt: [0, 0, 56] },
+    overview: { pos: [80, 60, 95], tgt: [0, 0, 56] },
+    front:    { pos: [0, -50, 56], tgt: [0, 0, 56] },
+    top:      { pos: [0, 0, 140], tgt: [0, 0, 56] },
+    pois: [
+      { id:'arcade', label:'弧形學術廊', pos:[24,24,62], color:'#61afef',
+        title:'弧形學術廊 (Academic Corridor)',
+        desc:'長達數百米的弧形走廊環抱校園北側。7層教學空間，南面開口面向清水灣。內設學術廊道連接各學院。',
+        photos:[]},
+      { id:'roof', label:'學術樓天台', pos:[0,0,74], color:'#98c379',
+        title:'學術樓天台',
+        desc:'弧形建築頂層，可俯瞰紅鳥廣場及清水灣海景。', photos:[]},
+      { id:'gap', label:'南面開口中庭', pos:[0,-16,50], color:'#e5c07b',
+        title:'學術樓南面開口',
+        desc:'弧形開口正對南方大海，賽馬會大堂與紅鳥廣場由此延伸。', photos:[]},
+    ],
+  },
+  atrium: {
+    file: 'voxel_atrium.json', name: '賽馬會大堂', icon: '🏫',
+    defaultCam: { pos: [35, 0, 70], tgt: [0, -38, 48] },
+    overview: { pos: [45, 15, 85], tgt: [0, -38, 48] },
+    front:    { pos: [0, -95, 50], tgt: [0, -38, 48] },
+    top:      { pos: [0, -38, 125], tgt: [0, -38, 48] },
+    pois: [
+      { id:'skylight', label:'玻璃天窗穹頂', pos:[0,-38,60], color:'#56b6c2',
+        title:'玻璃天窗穹頂 (Glass Skylight)',
+        desc:'標誌性玻璃天窗覆蓋中庭挑空上方，自然光線直灑大堂內部。鋼結構框架+玻璃面板。',
+        photos:[]},
+      { id:'void_center', label:'中庭挑空', pos:[0,-38,48], color:'#e5c07b',
+        title:'賽馬會大堂中庭 (Central Void)',
+        desc:'8m×12m宏偉挑空空間，4層階梯平台環繞。設有交叉手扶梯連接各層。',
+        photos:[]},
+      { id:'escalator', label:'中庭手扶梯', pos:[4,-40,43], color:'#e06c75',
+        title:'交叉手扶梯系統',
+        desc:'兩組交叉手扶梯穿越挑空空間，連接地面層至3樓平台層。', photos:[]},
+      { id:'mushroom', label:'觀景平台', pos:[7,-42,48], color:'#98c379',
+        title:'懸挑觀景平台 (Observation Deck)',
+        desc:'半圓形懸挑平台從中庭東側伸出，可俯瞰挑空空間及南面海景。', photos:[]},
+      { id:'north_bridge', label:'學術廊連接橋', pos:[0,-22,42], color:'#61afef',
+        title:'北連接橋 (Academic Bridge)',
+        desc:'13m長玻璃穹頂步道，連接大堂北入口至學術樓弧形走廊。', photos:[]},
+      { id:'south_entrance', label:'南向宏偉入口', pos:[0,-47,44], color:'#c678dd',
+        title:'大堂南入口 (Grand South Entrance)',
+        desc:'8m寬×10m高宏偉入口門洞，經16m寬門廊通向紅鳥廣場。', photos:[]},
+    ],
+  },
+  cyt: {
+    file: 'voxel_cyt.json', name: '鄭裕彤樓', icon: '🏗️',
+    defaultCam: { pos: [35, -50, 70], tgt: [0, -75, 52] },
+    overview: { pos: [50, -40, 90], tgt: [0, -75, 52] },
+    front:    { pos: [0, -100, 56], tgt: [0, -75, 52] },
+    top:      { pos: [0, -75, 125], tgt: [0, -75, 52] },
+    pois: [
+      { id:'cyt_main', label:'鄭裕彤樓', pos:[0,-75,52], color:'#c678dd',
+        title:'鄭裕彤樓 (Cheng Yu Tung Building)',
+        desc:'8層建築位於學術樓及廣場之間。設有機器人研究所、AI實驗室及400座演講廳。',
+        photos:[]},
+    ],
+  },
+  library: {
+    file: 'voxel_library.json', name: '圖書館', icon: '📚',
+    defaultCam: { pos: [80, 30, 70], tgt: [40, 10, 48] },
+    overview: { pos: [100, 45, 85], tgt: [40, 10, 48] },
+    front:    { pos: [40, -60, 52], tgt: [40, 10, 48] },
+    top:      { pos: [40, 10, 120], tgt: [40, 10, 48] },
+    pois: [
+      { id:'lib_main', label:'圖書館主樓', pos:[40,10,48], color:'#61afef',
+        title:'香港科技大學圖書館',
+        desc:'5層圖書館大樓嵌入學術樓東翼內側。短連接橋直達學術廊，收藏70萬冊圖書。',
+        photos:[]},
+    ],
+  },
+  lsk: {
+    file: 'voxel_lsk.json', name: '李兆基商學大樓', icon: '🏢',
+    defaultCam: { pos: [-20, -85, 62], tgt: [-50, -50, 44] },
+    overview: { pos: [-20, -100, 78], tgt: [-50, -50, 44] },
+    front:    { pos: [-50, -20, 52], tgt: [-50, -50, 44] },
+    top:      { pos: [-50, -50, 115], tgt: [-50, -50, 44] },
+    pois: [
+      { id:'lsk_main', label:'商學大樓', pos:[-50,-50,44], color:'#98c379',
+        title:'李兆基商學大樓 (LSK Business Building)',
+        desc:'獨立建築位於校園西南方，3層結構。北側入口迎向主校園。',
+        photos:[]},
+    ],
+  },
+  halls: {
+    file: 'voxel_halls.json', name: '學生宿舍群', icon: '🏘️',
+    defaultCam: { pos: [100, -100, 50], tgt: [65, -135, 20] },
+    overview: { pos: [120, -80, 70], tgt: [65, -135, 20] },
+    front:    { pos: [65, -50, 40], tgt: [65, -135, 20] },
+    top:      { pos: [65, -135, 120], tgt: [65, -135, 20] },
+    pois: [
+      { id:'halls_ug', label:'UG Halls I-IX', pos:[65,-135,24], color:'#e06c75',
+        title:'本科生宿舍群',
+        desc:'5棟梯田式塔樓沿山坡下降排列。通過連接橋相通，俯瞰清水灣海景。',
+        photos:[]},
+    ],
+  },
+  track: {
+    file: 'voxel_track.json', name: '運動場跑道', icon: '🏃',
+    defaultCam: { pos: [90, -100, 30], tgt: [85, -155, 2] },
+    overview: { pos: [95, -75, 25], tgt: [85, -155, 2] },
+    front:    { pos: [85, -220, 15], tgt: [85, -155, 2] },
+    top:      { pos: [85, -155, 100], tgt: [85, -155, 2] },
+    pois: [{id:'track_field',label:'田徑運動場',pos:[85,-155,2.5],color:'#e06c75',desc:'400m標準跑道及足球場'}],
+  },
+  pool: {
+    file: 'voxel_pool.json', name: '游泳池', icon: '🏊',
+    defaultCam: { pos: [100, -120, 20], tgt: [85, -138, 8] },
+    overview: { pos: [110, -110, 30], tgt: [85, -138, 8] },
+    front:    { pos: [85, -110, 16], tgt: [85, -138, 8] },
+    top:      { pos: [85, -138, 60], tgt: [85, -138, 8] },
+    pois: [{id:'pool_main',label:'室外泳池',pos:[82,-135,7.5],color:'#4488AA',desc:'50m奧林匹克標準泳池'}],
+  },
+  shaw: {
+    file: 'voxel_shaw.json', name: '逸夫演藝中心', icon: '🎭',
+    defaultCam: { pos: [160, -160, 30], tgt: [120, -190, 10] },
+    overview: { pos: [170, -150, 50], tgt: [120, -190, 10] },
+    front:    { pos: [120, -140, 25], tgt: [120, -190, 10] },
+    top:      { pos: [120, -190, 90], tgt: [120, -190, 10] },
+    pois: [{id:'shaw_hall',label:'逸夫演藝中心',pos:[120,-190,12],color:'#c678dd',desc:'橢圓形三環建築'}],
+  },
+  gate: {
+    file: 'voxel_gate.json', name: '北閘', icon: '🚪',
+    defaultCam: { pos: [30, 90, 55], tgt: [0, 60, 42] },
+    overview: { pos: [40, 100, 70], tgt: [0, 60, 42] },
+    front:    { pos: [0, 100, 48], tgt: [0, 60, 42] },
+    top:      { pos: [0, 60, 110], tgt: [0, 60, 42] },
+    pois: [{id:'north_gate',label:'北閘入口',pos:[0,60,43],color:'#e5c07b',desc:'校園主入口，紅色名牌牆'}],
+  },
+  garden: {
+    file: 'voxel_garden.json', name: '中式花園', icon: '🏯',
+    defaultCam: { pos: [-40, 60, 55], tgt: [-65, 35, 40] },
+    overview: { pos: [-30, 70, 70], tgt: [-65, 35, 40] },
+    front:    { pos: [-65, 60, 46], tgt: [-65, 35, 40] },
+    top:      { pos: [-65, 35, 100], tgt: [-65, 35, 40] },
+    pois: [{id:'garden_pond',label:'中式花園',pos:[-65,35,38],color:'#98c379',desc:'荷花池、涼亭、太湖石'}],
+  },
+  spring: {
+    file: 'voxel_spring.json', name: '天一泉', icon: '⛲',
+    defaultCam: { pos: [15, -40, 42], tgt: [0, -55, 38] },
+    overview: { pos: [20, -40, 50], tgt: [0, -55, 38] },
+    front:    { pos: [0, -70, 42], tgt: [0, -55, 38] },
+    top:      { pos: [0, -55, 70], tgt: [0, -55, 38] },
+    pois: [{id:'spring_fountain',label:'天一泉',pos:[0,-55,36.5],color:'#56b6c2',desc:'五大洲噴泉雕塑'}],
+  },
+  campus: {
+    file: 'voxel_campus.json', name: '全景校園', icon: '🏫',
+    defaultCam: { pos: [150, 80, 140], tgt: [30, -90, 35] },
+    overview: { pos: [180, 50, 180], tgt: [30, -90, 30] },
+    front:    { pos: [30, -430, 60], tgt: [30, -90, 35] },
+    top:      { pos: [30, -90, 280], tgt: [30, -90, 30] },
+    pois: [
+      { id:'ocean', label:'牛尾海', pos:[10,-280,-1], color:'#4488AA',
+        title:'牛尾海 (Port Shelter)',
+        desc:'校園南面面向清水灣及牛尾海。從學術平台可遠眺西貢群島。', photos:[]},
+      { id:'sundial_poi', label:'紅鳥日晷', pos:[0,-88,47], color:'#e06c75',
+        title:'紅鳥日晷 (Circle of Time)',
+        desc:'8.5米高紅色火焰雕塑，位於學術樓弧形開口南側的紅鳥廣場中心。', photos:[]},
+      { id:'library_poi', label:'圖書館', pos:[40,10,48], color:'#61afef',
+        title:'大學圖書館',
+        desc:'5層圖書館大樓，嵌入學術樓東翼內側。', photos:[]},
+      { id:'lsk_poi', label:'商學大樓', pos:[-50,-50,44], color:'#98c379',
+        title:'李兆基商學大樓',
+        desc:'獨立建築位於校園西南方。', photos:[]},
+      { id:'shaw_poi', label:'逸夫演藝中心', pos:[120,-190,15], color:'#e5c07b',
+        title:'逸夫演藝中心',
+        desc:'2021年開幕的橢圓形地標建築。三層同心白色圓環設計。', photos:[]},
+    ],
+  },
+};
+
+// Utility: crude sRGB→linear to match the Python script
+function srgbToLinear(c) {
+  return c.map(v => { const s = v/255; return s <= 0.04045 ? s/12.92 : Math.pow((s+0.055)/1.055, 2.4); });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  THREE.JS SETUP
+// ═══════════════════════════════════════════════════════════
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0d1117');
+scene.fog = new THREE.Fog('#0d1117', 60, 400);
+
+const camera = new THREE.PerspectiveCamera(48, innerWidth/innerHeight, 0.5, 800);
+camera.position.set(40, 25, 72);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.target.set(30, -90, 35);
+controls.minDistance = 5; controls.maxDistance = 300;
+controls.maxPolarAngle = Math.PI * 0.85;
+controls.minPolarAngle = Math.PI * 0.03;
+controls.autoRotateSpeed = 0.5; controls.update();
+
+// Lighting
+const ambient = new THREE.AmbientLight('#8899bb', 0.9);
+scene.add(ambient);
+const sun = new THREE.DirectionalLight('#fff8e8', 1.8);
+sun.position.set(50, 40, 60);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 400;
+sun.shadow.camera.left = -120; sun.shadow.camera.right = 120;
+sun.shadow.camera.top = 120; sun.shadow.camera.bottom = -120;
+sun.shadow.bias = 0.0001;
+scene.add(sun);
+scene.add(new THREE.HemisphereLight('#8899cc', '#445544', 0.4));
+
+const voxelGroup = new THREE.Group();
+scene.add(voxelGroup);
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let currentKey = 'plaza';
+let currentModel = null;
+let activePOI = null;
+let showAnnotations = true;
+const cache = {};
+const markerEls = [];
+
+// ═══════════════════════════════════════════════════════════
+//  CAMERA ANIMATION
+// ═══════════════════════════════════════════════════════════
+function animateCamera(toPos, toTgt, duration = 1200) {
+  const sPos = camera.position.clone(), sTgt = controls.target.clone();
+  const ePos = new THREE.Vector3(...toPos), eTgt = new THREE.Vector3(...toTgt);
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now-start)/duration, 1);
+    const ease = t<0.5 ? 2*t*t : -1+(4-2*t)*t;
+    camera.position.lerpVectors(sPos, ePos, ease);
+    controls.target.lerpVectors(sTgt, eTgt, ease);
+    controls.update();
+    if (t<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VOXEL LOADING
+// ═══════════════════════════════════════════════════════════
+function disposeModel() {
+  if (currentModel) {
+    if (currentModel.mesh) { voxelGroup.remove(currentModel.mesh); currentModel.mesh.dispose(); }
+    if (currentModel.mat) currentModel.mat.dispose();
+    if (currentModel.geo) currentModel.geo.dispose();
+    currentModel = null;
+  }
+  markerEls.forEach(el => el.remove()); markerEls.length = 0;
+}
+
+async function loadModel(key) {
+  const lm = LANDMARKS[key];
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('loading-msg').textContent = `載入 ${lm.name}...`;
+  document.getElementById('load-bar-fill').style.width = '5%';
+
+  let voxelData;
+  if (!cache[key]) {
+    try {
+      const resp = await fetch(lm.file);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      voxelData = await resp.json();
+      cache[key] = voxelData;
+      document.getElementById('load-bar-fill').style.width = '40%';
+      document.getElementById('loading-msg').textContent = `載入 ${lm.name}... 解析完成`;
+    } catch(e) {
+      document.getElementById('loading').classList.add('hidden');
+      alert(`無法載入: ${lm.file}\n${e.message}`);
+      return;
+    }
+  } else {
+    voxelData = cache[key];
+  }
+
+  disposeModel();
+
+  const { positions, colors, bbox, pitch } = voxelData;
+  const boxGeo = new THREE.BoxGeometry(1.003, 1.003, 1.003);
+  const mat = new THREE.MeshLambertMaterial({});
+  const count = positions.length;
+  const im = new THREE.InstancedMesh(boxGeo, mat, count);
+  im.castShadow = false; im.receiveShadow = false;
+
+  const m = new THREE.Matrix4();
+  const te = m.elements;
+  const color = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const [px, py, pz] = positions[i];
+    te[0]=pitch; te[5]=pitch; te[10]=pitch;
+    te[12]=px; te[13]=py; te[14]=pz;
+    te[1]=te[2]=te[3]=te[4]=te[6]=te[7]=te[8]=te[9]=te[11]=0;
+    te[15]=1;
+    im.setMatrixAt(i, m);
+    if (i % 50000 === 0) {
+      const pct = 40 + Math.floor((i / count) * 55);
+      document.getElementById('load-bar-fill').style.width = pct + '%';
+      document.getElementById('loading-msg').textContent = `載入 ${lm.name}... ${Math.floor(i/count*100)}%`;
+    }
+    const [cr, cg, cb] = colors[i];
+    const [lr, lg, lb] = srgbToLinear([cr, cg, cb]);
+    color.setRGB(lr, lg, lb);
+    im.setColorAt(i, color);
+  }
+  im.instanceMatrix.needsUpdate = true;
+  if (im.instanceColor) im.instanceColor.needsUpdate = true;
+
+  voxelGroup.add(im);
+  currentModel = { mesh: im, mat, geo: boxGeo };
+
+  // Ground ring
+  const ringGeo = new THREE.RingGeometry(1, 1.05, 64);
+  const ringMat = new THREE.MeshBasicMaterial({ color: '#3a3e48', transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide });
+  const groundRing = new THREE.Mesh(ringGeo, ringMat);
+  groundRing.renderOrder = 2;
+  groundRing.rotation.x = -Math.PI / 2;
+  const midX = (bbox.min[0] + bbox.max[0]) / 2;
+  const midY = (bbox.min[1] + bbox.max[1]) / 2;
+  const groundZ = bbox.min[2];
+  const bboxR = Math.max(bbox.max[0]-bbox.min[0], bbox.max[1]-bbox.min[1]) / 2 + 5;
+  groundRing.scale.set(bboxR, bboxR, 1);
+  groundRing.position.set(midX, midY, groundZ + 0.1);
+  scene.add(groundRing);
+  currentModel.groundRing = groundRing;
+
+  currentKey = key;
+  camera.position.set(...lm.defaultCam.pos);
+  controls.target.set(...lm.defaultCam.tgt);
+  // Dynamic polar angle per landmark
+  const closedLandmarks = ['plaza','academic','atrium','library','lsk','track','cyt','halls','pool','shaw','gate','garden','spring'];
+  controls.maxPolarAngle = closedLandmarks.includes(key) ? Math.PI * 0.94 : Math.PI * 0.85;
+  controls.update();
+
+  buildMarkers(lm);
+  buildPOIButtons(lm);
+  updateTopbar(key);
+  document.getElementById('load-bar-fill').style.width = '100%';
+  document.getElementById('loading-msg').textContent = `完成: ${lm.name}`;
+  setTimeout(() => { document.getElementById('loading').classList.add('hidden'); }, 400);
+  document.getElementById('st-model').textContent = lm.name;
+  document.getElementById('st-poi').textContent = '—';
+  const cats = voxelData.categories;
+  const catEl = document.getElementById('st-cats');
+  if (!cats && catEl) { catEl.textContent = `${count.toLocaleString()} voxels`; }
+  else if (cats && catEl) {
+    const parts = [];
+    if (cats.building && cats.building.count > 0) parts.push(`🧱${(cats.building.count/1000).toFixed(0)}k`);
+    if (cats.terrain && cats.terrain.count > 0) parts.push(`🌿${(cats.terrain.count/1000).toFixed(0)}k`);
+    if (cats.water && cats.water.count > 0) parts.push(`💧${cats.water.count}`);
+    catEl.textContent = parts.join(' ');
+  }
+
+  setTimeout(() => {
+    const hint = document.getElementById('hint');
+    if (hint) hint.style.opacity = '0';
+  }, 8000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MARKERS & POI
+// ═══════════════════════════════════════════════════════════
+function buildMarkers(lm) {
+  markerEls.forEach(el => el.remove()); markerEls.length = 0;
+  lm.pois.forEach(poi => {
+    const dot = document.createElement('div');
+    dot.className = 'marker-dot';
+    dot.style.color = poi.color;
+    dot.title = `${poi.label}: ${poi.title}`;
+    dot.addEventListener('click', e => { e.stopPropagation(); selectPOI(poi); });
+    document.body.appendChild(dot);
+    dot._poi = poi;
+    markerEls.push(dot);
+  });
+}
+
+function updateMarkerPositions() {
+  markerEls.forEach(dot => {
+    const poi = dot._poi;
+    const pos = new THREE.Vector3(...poi.pos).project(camera);
+    if (pos.z > 1) { dot.style.display = 'none'; return; }
+    dot.style.display = showAnnotations ? '' : 'none';
+    dot.style.left = ((pos.x * innerWidth/2) + innerWidth/2) + 'px';
+    dot.style.top = (-(pos.y * innerHeight/2) + innerHeight/2) + 'px';
+  });
+}
+
+function buildPOIButtons(lm) {
+  const list = document.getElementById('poi-list');
+  list.innerHTML = '';
+  lm.pois.forEach(poi => {
+    const btn = document.createElement('button');
+    btn.className = 'poi-btn'; btn.dataset.poi = poi.id;
+    btn.innerHTML = `<span class="poi-marker" style="background:${poi.color};color:${poi.color}"></span>${poi.label}`;
+    btn.addEventListener('click', () => selectPOI(poi));
+    list.appendChild(btn);
+  });
+}
+
+function selectPOI(poi) {
+  activePOI = poi;
+  animateCamera([poi.pos[0]+15, poi.pos[1]+20, poi.pos[2]+12], poi.pos);
+  document.getElementById('st-poi').textContent = poi.label;
+  updatePOIButtons();
+}
+
+function updatePOIButtons() {
+  document.querySelectorAll('.poi-btn').forEach(b => {
+    b.classList.toggle('active', activePOI && b.dataset.poi === activePOI.id);
+  });
+}
+
+function updateTopbar(key) {
+  document.querySelectorAll('#topbar button').forEach(b => {
+    b.classList.toggle('active', b.dataset.model === key);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EVENT LISTENERS
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('#topbar button[data-model]').forEach(btn => {
+  btn.addEventListener('click', () => { if (btn.dataset.model !== currentKey) loadModel(btn.dataset.model); });
+});
+
+document.getElementById('btn-overview')?.addEventListener('click', () => {
+  const v = LANDMARKS[currentKey].overview; animateCamera(v.pos, v.tgt);
+});
+document.getElementById('btn-front')?.addEventListener('click', () => {
+  const v = LANDMARKS[currentKey].front; animateCamera(v.pos, v.tgt);
+});
+document.getElementById('btn-top')?.addEventListener('click', () => {
+  const v = LANDMARKS[currentKey].top; animateCamera(v.pos, v.tgt);
+});
+
+document.getElementById('tg-annot').addEventListener('change', function(){ showAnnotations = this.checked; });
+document.getElementById('tg-rotate').addEventListener('change', function(){ controls.autoRotate = this.checked; });
+document.getElementById('tg-wire').addEventListener('change', function(){
+  if (currentModel && currentModel.mat) {
+    currentModel.mat.wireframe = this.checked;
+    currentModel.mat.color.set(this.checked ? '#5baeff' : '#ffffff');
+  }
+});
+
+window.addEventListener('keydown', e => {
+  const keys = {'0':'campus','1':'plaza','2':'academic','3':'cyt','4':'atrium','5':'track','6':'library','7':'lsk','8':'halls','9':'shaw','-':'gate','=':'garden','[':'pool',']':'spring'};
+  if (keys[e.key] && document.activeElement===document.body) loadModel(keys[e.key]);
+  if (e.key==='r' && document.activeElement===document.body) {
+    const lm = LANDMARKS[currentKey]; animateCamera(lm.defaultCam.pos, lm.defaultCam.tgt);
+  }
+  if (e.key==='f' && document.activeElement===document.body) {
+    const v = LANDMARKS[currentKey].top; animateCamera(v.pos, v.tgt);
+  }
+});
+
+// Ctrl+Click coordinate debug
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+window.addEventListener('click', e => {
+  if (!e.ctrlKey && !e.metaKey) return;
+  if (!currentModel || !currentModel.mesh) return;
+  mouse.x = (e.clientX/innerWidth)*2-1; mouse.y = -(e.clientY/innerHeight)*2+1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObject(currentModel.mesh);
+  if (hits.length > 0) {
+    const p = hits[0].point;
+    const msg = `📍 [${p.x.toFixed(0)}, ${p.y.toFixed(0)}, ${p.z.toFixed(0)}]`;
+    console.log(msg);
+    const tip = document.createElement('div');
+    tip.style.cssText = `position:fixed;z-index:200;left:${e.clientX+12}px;top:${e.clientY-22}px;background:rgba(22,24,30,0.9);color:#e5c07b;padding:5px 12px;border-radius:7px;font-size:12px;pointer-events:none;font-family:monospace;border:1px solid rgba(229,192,123,0.4);backdrop-filter:blur(8px);`;
+    tip.textContent = msg; document.body.appendChild(tip);
+    setTimeout(() => tip.remove(), 2200);
+  }
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER LOOP
+// ═══════════════════════════════════════════════════════════
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  updateMarkerPositions();
+  renderer.render(scene, camera);
+}
+
+// Init
+loadModel('plaza').then(() => animate());
+console.log('🏫 HKUST 3D Campus Viewer');
+console.log('  Ctrl+Click → 3D坐标 | 0-9 切换 | R 重置 | F 俯視');
+</script>

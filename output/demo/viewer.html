@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HKUST 3D Campus — 香港科技大學三維校園</title>
+<style>
+  :root {
+    --bg: #0d0f12; --glass: rgba(22,24,30,0.82); --glass-hover: rgba(30,34,42,0.9);
+    --border: rgba(255,255,255,0.08); --border-active: rgba(77,166,255,0.35);
+    --text: #8890a0; --text-bright: #dde0e6;
+    --accent: #5baeff; --gold: #e5c07b; --red: #e06c75; --green: #8ebf7a;
+    --radius: 12px; --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: #0d0f12; font-family: var(--font);
+    overflow: hidden; height: 100vh; width: 100vw; color: var(--text);
+    user-select: none; -webkit-user-select: none;
+  }
+  canvas { display: block; position: relative; z-index: 1; }
+
+  /* ── Gradient sky overlay ── */
+  #sky {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 35%, #1a2a3a 0%, #0d1117 55%, #080b0e 100%);
+  }
+
+  /* ── Top bar ── */
+  #topbar {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    z-index: 100; display: flex; gap: 3px;
+    background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 5px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  #topbar button {
+    padding: 10px 18px; border: 1px solid transparent; border-radius: 9px;
+    background: transparent; color: var(--text); cursor: pointer;
+    font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.25s;
+    font-family: var(--font); letter-spacing: 0.3px;
+  }
+  #topbar button:hover { background: rgba(255,255,255,0.05); color: var(--text-bright); }
+  #topbar button.active {
+    background: rgba(77,166,255,0.12); color: var(--accent);
+    border-color: var(--border-active); box-shadow: 0 0 16px rgba(77,166,255,0.1);
+  }
+
+  /* ── Right panel ── */
+  #panel {
+    position: fixed; right: 16px; top: 96px; z-index: 100;
+    display: flex; flex-direction: column; gap: 8px; width: 205px;
+  }
+  .pgroup {
+    background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 13px 15px; box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+    transition: all 0.3s;
+  }
+  .pgroup h3 {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text); margin-bottom: 9px; font-weight: 600;
+  }
+  .poi-btn {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 8px 10px; margin-bottom: 2px; border: none; border-radius: 7px;
+    background: transparent; color: var(--text); cursor: pointer;
+    font-size: 12px; text-align: left; transition: all 0.2s; font-family: var(--font);
+  }
+  .poi-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-bright); }
+  .poi-btn.active { background: rgba(77,166,255,0.1); color: var(--accent); }
+  .poi-marker {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  /* ── Photo card ── */
+  .photo-card {
+    position: fixed; z-index: 90;
+    background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+    width: 280px; opacity: 0; transform: translateY(12px) scale(0.96);
+    transition: opacity 0.35s, transform 0.35s; pointer-events: auto;
+  }
+  .photo-card.visible { opacity: 1; transform: translateY(0) scale(1); }
+  .photo-card img {
+    width: 100%; height: 170px; object-fit: cover; display: block; background: #1a1d24;
+  }
+  .photo-card .card-body { padding: 14px 16px; }
+  .photo-card .card-title { font-size: 14px; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+  .photo-card .card-desc { font-size: 11px; color: var(--text); line-height: 1.55; }
+  .photo-card .close-btn {
+    position: absolute; top: 10px; right: 10px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.1); color: #fff;
+    cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .photo-card .close-btn:hover { background: rgba(0,0,0,0.8); border-color: rgba(255,255,255,0.2); }
+
+  /* ── Marker dot overlay ── */
+  .marker-dot {
+    position: fixed; z-index: 80; pointer-events: auto; cursor: pointer;
+    width: 14px; height: 14px; border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 16px 3px currentColor;
+    transition: opacity 0.3s, transform 0.2s;
+  }
+  .marker-dot::after {
+    content: ''; position: absolute; inset: -5px; border-radius: 50%;
+    border: 2px solid currentColor; opacity: 0.5;
+    animation: pulse-ring 2.5s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.7); opacity: 0.7; }
+    100% { transform: scale(2.8); opacity: 0; }
+  }
+  .marker-dot:hover { transform: translate(-50%, -50%) scale(1.4); }
+
+  /* ── Toggle row ── */
+  .tg-row { display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; padding:3px 0; color: var(--text); }
+  .tg-row input { accent-color: var(--accent); }
+
+  /* ── Bottom bar ── */
+  #infobar {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    z-index: 100;
+    background: var(--glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 7px 18px; font-size: 11px; color: var(--text);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    display: flex; gap: 18px; align-items: center;
+  }
+  #infobar .st { display:flex; gap:5px; align-items:center; }
+  #infobar .st-l { color:#5c6370; }
+  #infobar .st-v { color:var(--text-bright); font-weight:500; }
+
+  /* ── Loading ── */
+  #loading {
+    position: fixed; inset:0; z-index:200;
+    background: var(--bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition: opacity 0.5s;
+  }
+  #loading.hidden { opacity:0; pointer-events:none; }
+  .spinner {
+    width:38px; height:38px; border:3px solid rgba(255,255,255,0.08);
+    border-top-color:var(--accent); border-radius:50%;
+    animation:sp 0.8s linear infinite; margin-bottom:16px;
+  }
+  @keyframes sp { to{transform:rotate(360deg);} }
+  #loading-msg { font-size:14px; color:var(--text); font-family:var(--font); }
+
+  /* ── Welcome overlay (first visit) ── */
+  #hint {
+    position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
+    z-index: 99; font-size: 12px; color: rgba(255,255,255,0.35);
+    pointer-events: none; transition: opacity 1.5s;
+    font-family: var(--font); letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div id="sky"></div>
+<div id="loading"><div class="spinner"></div><div id="loading-msg">載入模型中...</div></div>
+<div id="hint">🖱 拖拽旋轉 &nbsp;|&nbsp; 滾輪縮放 &nbsp;|&nbsp; 右鍵平移 &nbsp;|&nbsp; Ctrl+點擊 查看坐標</div>
+
+<!-- Top bar -->
+<div id="topbar">
+  <button class="active" data-model="piazza">🔴 紅鳥廣場</button>
+  <button data-model="academic">🏛️ 學術樓</button>
+  <button data-model="seaside">🌊 海濱+運動場</button>
+  <button data-model="atrium">🏫 賽馬會大堂</button>
+  <span style="border-left:1px solid rgba(255,255,255,0.12);margin:4px 6px"></span>
+  <a href="viewer_voxel.html" style="padding:10px 14px;border:1px solid rgba(229,192,123,0.4);border-radius:9px;color:#e5c07b;text-decoration:none;font-size:12px;display:flex;align-items:center;gap:4px;transition:all 0.25s;font-family:var(--font)" title="Minecraft方塊風格">🧱 方塊</a>
+</div>
+
+<!-- Right panel -->
+<div id="panel">
+  <div class="pgroup" id="poi-group">
+    <h3>◆ 地標景點</h3>
+    <div id="poi-list"></div>
+  </div>
+  <div class="pgroup">
+    <h3>◆ 視角</h3>
+    <button class="poi-btn" id="btn-overview">📐 全景俯瞰</button>
+    <button class="poi-btn" id="btn-front">👁️ 正面視角</button>
+    <button class="poi-btn" id="btn-top">🔝 鳥瞰俯視</button>
+  </div>
+  <div class="pgroup">
+    <h3>◆ 顯示</h3>
+    <div class="tg-row"><input type="checkbox" id="tg-annot" checked><span>標註點</span></div>
+    <div class="tg-row"><input type="checkbox" id="tg-rotate"><span>自動旋轉</span></div>
+    <div class="tg-row"><input type="checkbox" id="tg-wire"><span>線框模式</span></div>
+  </div>
+</div>
+
+<!-- Bottom info bar -->
+<div id="infobar">
+  <div class="st"><span class="st-l">模型</span><span class="st-v" id="st-model">—</span></div>
+  <div class="st"><span class="st-l">景點</span><span class="st-v" id="st-poi">—</span></div>
+  <div class="st"><span class="st-l">快捷鍵</span><span class="st-v">1-4 切換 · R 重置</span></div>
+</div>
+
+<script type="importmap">
+{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+// ═══════════════════════════════════════════════════════════
+//  LANDMARKS DATA
+// ═══════════════════════════════════════════════════════════
+
+const LANDMARKS = {
+  piazza: {
+    file: 'hkust_piazza.glb', name: '紅鳥廣場', icon: '🔴',
+    defaultCam: { pos: [40, 25, 72], tgt: [0, 0, 38] },
+    overview: { pos: [50, 40, 88], tgt: [0, 0, 40] },
+    front:    { pos: [0, 50, 46], tgt: [0, 0, 40] },
+    top:      { pos: [0, 0, 125], tgt: [0, 0, 40] },
+    pois: [
+      { id:'sundial', label:'時間之輪日晷', pos:[0,0,46], color:'#e5c07b',
+        title:'紅鳥日晷 (Circle of Time)',
+        desc:'8.5米高鑄鋼雕塑，由澳洲雕塑家Charles & Joan Walsh-Smith創作，1991年揭幕。赤道環式日晷設計。',
+        photos:[{url:'https://commons.wikimedia.org/wiki/Special:FilePath/HKUST_Sundial.JPG?width=400',cap:'紅鳥日晷'}]},
+      { id:'plaza', label:'紅鳥廣場', pos:[5,5,39], color:'#e06c75',
+        title:'紅鳥廣場 (Red Bird Square)',
+        desc:'港科大的心臟地帶，紅磚同心圓鋪地。四周被弧形學術樓環抱。',
+        photos:[{url:'https://commons.wikimedia.org/wiki/Special:FilePath/HKUST_%E5%BB%A3%E5%A0%B4_2022-11-05.jpg?width=400',cap:'紅鳥廣場全景'}]},
+      { id:'wing', label:'學術樓立面', pos:[-3,5,58], color:'#61afef',
+        title:'學術樓弧形立面',
+        desc:'從廣場仰望可見標誌性的弧形玻璃幕牆，香港十大建築之一。', photos:[]},
+    ],
+  },
+  academic: {
+    file: 'hkust_academic.glb', name: '學術樓', icon: '🏛️',
+    defaultCam: { pos: [50, 35, 70], tgt: [0, 0, 30] },
+    overview: { pos: [60, 45, 85], tgt: [0, 0, 25] },
+    front:    { pos: [0, 50, 40], tgt: [0, 0, 30] },
+    top:      { pos: [0, 0, 125], tgt: [0, 0, 25] },
+    pois: [
+      { id:'arcade', label:'弧形學術廊', pos:[9,-12,70], color:'#61afef',
+        title:'弧形學術廊 (Academic Corridor)',
+        desc:'長達數百米的弧形走廊，連接各學系。香港十大建築之一，1992年獲建築師學會金獎。', photos:[]},
+      { id:'entrance', label:'學術樓主入口', pos:[-6,-3,44], color:'#98c379',
+        title:'學術樓主入口',
+        desc:'面向紅鳥廣場的入口，玻璃幕牆與弧形結構形成獨特視覺效果。', photos:[]},
+      { id:'lecture', label:'演講廳區', pos:[15,-9,95], color:'#e5c07b',
+        title:'演講廳 (Lecture Theaters)',
+        desc:'學術樓內設多個大型演講廳，為港科大主要教學場所。', photos:[]},
+    ],
+  },
+  seaside: {
+    file: 'hkust_seaside.glb', name: '海濱長廊+運動場', icon: '🌊',
+    defaultCam: { pos: [45, 35, 40], tgt: [6, 22, 10] },
+    overview: { pos: [35, 45, 50], tgt: [0, 22, 8] },
+    front:    { pos: [6, -30, 18], tgt: [6, 25, 12] },
+    top:      { pos: [5, 20, 95], tgt: [5, 20, 8] },
+    pois: [
+      { id:'track', label:'田徑運動場', pos:[6,25,23], color:'#e06c75',
+        title:'海景田徑場 (Seaside Track)',
+        desc:'被譽為「香港最美球場」，400米跑道+標準足球場，背山面海。', photos:[]},
+      { id:'promenade', label:'海濱長廊', pos:[-6,22,10], color:'#61afef',
+        title:'海濱長廊 (Seaside Promenade)',
+        desc:'沿海步道延伸至礁石區，可遠眺清水灣及西貢群島，日落景色尤佳。', photos:[]},
+      { id:'peak', label:'山頂觀景', pos:[33,-15,148], color:'#98c379',
+        title:'校園制高點',
+        desc:'海拔151米，可360度俯瞰整個清水灣校園及牛尾海。', photos:[]},
+    ],
+  },
+  atrium: {
+    file: 'hkust_atrium.glb', name: '賽馬會大堂', icon: '🏫',
+    defaultCam: { pos: [25, 30, 50], tgt: [-2, 1, 20] },
+    overview: { pos: [30, 40, 60], tgt: [-5, 0, 18] },
+    front:    { pos: [-2, 30, 30], tgt: [-2, 1, 22] },
+    top:      { pos: [-5, 0, 70], tgt: [-5, 0, 18] },
+    pois: [
+      { id:'hall', label:'賽馬會大堂中庭', pos:[-2,1,47], color:'#e5c07b',
+        title:'賽馬會大堂 (Jockey Club Atrium)',
+        desc:'港科大主樓大堂，由香港賽馬會捐建。拱形設計直望大海，科大12大打卡點第3位。',
+        photos:[{url:'https://commons.wikimedia.org/wiki/Special:FilePath/HKUST_%E5%BB%A3%E5%A0%B4_2022-11-05.jpg?width=400',cap:'賽馬會大堂'}]},
+      { id:'door', label:'大堂入口', pos:[-15,-3,28], color:'#61afef',
+        title:'大堂主入口',
+        desc:'從紅鳥廣場經階梯而上即達，是進入學術樓的主要通道。', photos:[]},
+    ],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════
+//  THREE.JS SETUP
+// ═══════════════════════════════════════════════════════════
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0d1117');
+scene.fog = new THREE.Fog('#0d1117', 60, 300);
+
+const camera = new THREE.PerspectiveCamera(48, innerWidth/innerHeight, 0.5, 600);
+camera.position.set(40, 25, 72);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.target.set(0, 0, 40);
+controls.minDistance = 5; controls.maxDistance = 200;
+controls.maxPolarAngle = Math.PI * 0.58;  // ⬅ prevents seeing hollow bottom
+controls.autoRotateSpeed = 0.5; controls.update();
+
+// ── Lighting ─────────────────────────────────────────────
+const ambient = new THREE.AmbientLight('#8899bb', 0.9);
+scene.add(ambient);
+
+const sun = new THREE.DirectionalLight('#fff8e8', 1.8);
+sun.position.set(50, 40, 60);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 400;
+sun.shadow.camera.left = -120; sun.shadow.camera.right = 120;
+sun.shadow.camera.top = 120; sun.shadow.camera.bottom = -120;
+sun.shadow.bias = -0.0002;
+scene.add(sun);
+
+scene.add(new THREE.HemisphereLight('#8899cc', '#445544', 0.4));
+
+// ── Ground Elements (rebuilt per model) ──────────────────
+  const groundGroup = new THREE.Group();
+  groundGroup.renderOrder = 1;
+  scene.add(groundGroup);
+
+  /** Sample the model surface Z via raycasting from above.
+   *  Picks the 8th percentile to avoid stray low outliers. */
+  function computeGroundLevel(model) {
+    const box = new THREE.Box3().setFromObject(model);
+    const dx = box.max.x - box.min.x, dy = box.max.y - box.min.y;
+    const cx = (box.max.x + box.min.x) / 2, cy = (box.max.y + box.min.y) / 2;
+    const halfW = dx * 0.55, halfH = dy * 0.55;
+    const dir = new THREE.Vector3(0, 0, -1);
+    const raycaster = new THREE.Raycaster();
+    raycaster.far = 400;
+    const zSamples = [];
+    const steps = 14;
+    for (let ix = 0; ix <= steps; ix++) {
+      for (let iy = 0; iy <= steps; iy++) {
+        const sx = cx - halfW + (2 * halfW * ix / steps);
+        const sy = cy - halfH + (2 * halfH * iy / steps);
+        raycaster.set(new THREE.Vector3(sx, sy, box.max.z + 30), dir);
+        const hits = raycaster.intersectObject(model, false);
+        if (hits.length > 0) zSamples.push(hits[0].point.z);
+      }
+    }
+    if (zSamples.length < 10) return box.min.z;
+    zSamples.sort((a, b) => a - b);
+    const pIdx = Math.floor(zSamples.length * 0.08);
+    return zSamples[Math.max(0, Math.min(pIdx, zSamples.length - 1))];
+  }
+
+  function buildGroundElements(model) {
+    while (groundGroup.children.length > 0) groundGroup.remove(groundGroup.children[0]);
+    const box = new THREE.Box3().setFromObject(model);
+    const cx = (box.max.x + box.min.x) / 2;
+    const cy = (box.max.y + box.min.y) / 2;
+    const dx = box.max.x - box.min.x;
+    const dy = box.max.y - box.min.y;
+    const modelRadius = Math.max(dx, dy) * 0.55;
+    const groundZ = computeGroundLevel(model);
+
+    // Subtle shadow disc at computed ground level
+    const sdGeo = new THREE.CylinderGeometry(modelRadius * 0.92, modelRadius * 0.92, 0.04, 64);
+    const sdMat = new THREE.MeshBasicMaterial({
+      color: '#000000', transparent: true, opacity: 0.22, depthWrite: false,
+    });
+    const sd = new THREE.Mesh(sdGeo, sdMat);
+    sd.position.set(cx, cy, groundZ - 0.02);
+    sd.renderOrder = 1;
+    groundGroup.add(sd);
+
+    // Thin accent ring at ground perimeter
+    const ringGeo = new THREE.TorusGeometry(modelRadius * 0.9, 0.15, 8, 100);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: '#3a3e48', transparent: true, opacity: 0.3, depthWrite: false,
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.set(cx, cy, groundZ + 0.03);
+    ring.renderOrder = 2;
+    groundGroup.add(ring);
+  }
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+
+let currentKey = 'piazza';
+let currentModel = null;
+let activePOI = null;
+let showAnnotations = true;
+const loader = new GLTFLoader();
+const cache = {};
+const markerEls = [];
+
+// ═══════════════════════════════════════════════════════════
+//  PHOTO CARD
+// ═══════════════════════════════════════════════════════════
+
+let photoCard = null, photoCardPOI = null;
+
+function createPhotoCard() {
+  const el = document.createElement('div');
+  el.className = 'photo-card';
+  el.innerHTML = `<button class="close-btn">✕</button><div class="card-imgs"></div><div class="card-body"><div class="card-title"></div><div class="card-desc"></div></div>`;
+  el.querySelector('.close-btn').addEventListener('click', hidePhotoCard);
+  document.body.appendChild(el);
+  return el;
+}
+
+function showPhotoCard(poi) {
+  if (!photoCard) photoCard = createPhotoCard();
+  photoCardPOI = poi;
+  const imgsDiv = photoCard.querySelector('.card-imgs');
+  imgsDiv.innerHTML = poi.photos.length > 0
+    ? poi.photos.map(p => `<img src="${p.url}" alt="${p.cap}" loading="lazy" onerror="this.style.display='none'">`).join('')
+    : `<div style="height:100px;display:flex;align-items:center;justify-content:center;color:#444;font-size:12px;background:#15181e;">📷 暫無照片</div>`;
+  photoCard.querySelector('.card-title').textContent = poi.title;
+  photoCard.querySelector('.card-desc').textContent = poi.desc;
+  updatePhotoCardPosition();
+  photoCard.classList.add('visible');
+}
+
+function hidePhotoCard() {
+  if (photoCard) photoCard.classList.remove('visible');
+  photoCardPOI = null; activePOI = null; updatePOIButtons();
+  document.getElementById('st-poi').textContent = '—';
+}
+
+function updatePhotoCardPosition() {
+  if (!photoCard || !photoCardPOI) return;
+  const pos = new THREE.Vector3(...photoCardPOI.pos).project(camera);
+  const x = (pos.x * innerWidth/2) + innerWidth/2;
+  const y = -(pos.y * innerHeight/2) + innerHeight/2;
+  const ox = Math.min(x + 170, innerWidth - 300);
+  const oy = Math.max(y - 90, 80);
+  photoCard.style.opacity = pos.z > 1 ? '0' : '';
+  photoCard.style.left = ox + 'px'; photoCard.style.top = oy + 'px';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  3D MARKERS
+// ═══════════════════════════════════════════════════════════
+
+const markerGroup = new THREE.Group();
+markerGroup.renderOrder = 999;
+scene.add(markerGroup);
+
+function clearMarkers() {
+  markerEls.forEach(m => m.el.remove());
+  markerEls.length = 0;
+  while (markerGroup.children.length > 0) markerGroup.remove(markerGroup.children[0]);
+}
+
+function buildMarkers(landmark) {
+  clearMarkers();
+  const gz = landmark.groundZ || 0;
+
+  landmark.pois.forEach(poi => {
+    // CSS dot
+    const el = document.createElement('div');
+    el.className = 'marker-dot';
+    el.style.color = poi.color;
+    el.title = poi.label;
+    el.addEventListener('click', e => { e.stopPropagation(); selectPOI(poi); });
+    document.body.appendChild(el);
+    markerEls.push({ el, pos3: new THREE.Vector3(...poi.pos), color: poi.color, poi });
+
+    // 3D ring
+    const ringGeo = new THREE.TorusGeometry(0.5, 0.07, 8, 24);
+    const ringMat = new THREE.MeshBasicMaterial({ color: poi.color, transparent: true, opacity: 0.85, depthTest: false, depthWrite: false });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.set(...poi.pos);
+    ring.renderOrder = 999;
+    markerGroup.add(ring);
+
+    // Pole
+    const poleH = poi.pos[2] - gz;
+    if (poleH > 1) {
+      const poleGeo = new THREE.CylinderGeometry(0.06, 0.06, poleH, 8);
+      const poleMat = new THREE.MeshBasicMaterial({ color: poi.color, transparent: true, opacity: 0.4, depthTest: false, depthWrite: false });
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.set(poi.pos[0], poi.pos[1], gz + poleH/2);
+      pole.renderOrder = 998;
+      markerGroup.add(pole);
+    }
+  });
+}
+
+function updateMarkerPositions() {
+  markerEls.forEach(({ el, pos3, poi }) => {
+    const sp = pos3.clone().project(camera);
+    const x = (sp.x * innerWidth/2) + innerWidth/2;
+    const y = -(sp.y * innerHeight/2) + innerHeight/2;
+    const behind = sp.z > 1;
+    const active = activePOI && activePOI.id === poi.id;
+    el.style.opacity = (behind || !showAnnotations) ? '0' : (active ? '1' : '0.65');
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+    el.style.transform = active ? 'translate(-50%,-50%) scale(1.5)' : 'translate(-50%,-50%) scale(1)';
+  });
+  markerGroup.visible = showAnnotations;
+  // Pulse rings
+  const t = performance.now() * 0.001;
+  markerGroup.children.forEach((c, i) => {
+    if (c.geometry && c.geometry.type === 'TorusGeometry') {
+      c.scale.setScalar(1 + 0.12 * Math.sin(t * 2.2 + i));
+    }
+  });
+  updatePhotoCardPosition();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  POI / CAMERA
+// ═══════════════════════════════════════════════════════════
+
+function selectPOI(poi) {
+  if (activePOI && activePOI.id === poi.id) { hidePhotoCard(); return; }
+  activePOI = poi;
+  showPhotoCard(poi);
+  animateCamera(
+    [poi.pos[0] + 15, poi.pos[1] + 20, poi.pos[2] + 12],
+    poi.pos
+  );
+  updatePOIButtons();
+  document.getElementById('st-poi').textContent = poi.label;
+}
+
+function updatePOIButtons() {
+  document.querySelectorAll('.poi-btn[data-poi]').forEach(b =>
+    b.classList.toggle('active', activePOI && b.dataset.poi === activePOI.id));
+}
+
+function animateCamera(toPos, toTgt, duration = 1200) {
+  const sPos = camera.position.clone(), sTgt = controls.target.clone();
+  const ePos = new THREE.Vector3(...toPos), eTgt = new THREE.Vector3(...toTgt);
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now-start)/duration, 1);
+    const ease = t<0.5 ? 2*t*t : -1+(4-2*t)*t;
+    camera.position.lerpVectors(sPos, ePos, ease);
+    controls.target.lerpVectors(sTgt, eTgt, ease);
+    controls.update();
+    if (t<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODEL LOADING
+// ═══════════════════════════════════════════════════════════
+
+function disposeModel() {
+  if (currentModel) {
+    currentModel.traverse(c => {
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) {
+        (Array.isArray(c.material)?c.material:[c.material]).forEach(m => {
+          for (const k of Object.keys(m)) if (m[k]?.isTexture) m[k].dispose();
+          m.dispose();
+        });
+      }
+    });
+    scene.remove(currentModel);
+    currentModel = null;
+  }
+}
+
+async function loadModel(key) {
+  const lm = LANDMARKS[key];
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('loading-msg').textContent = `載入 ${lm.name}...`;
+
+  if (!cache[key]) {
+    try { cache[key] = (await loader.loadAsync(lm.file)).scene; }
+    catch(e) {
+      document.getElementById('loading').classList.add('hidden');
+      alert(`無法載入: ${lm.file}\n請確保通過 HTTP 服務器訪問`);
+      return;
+    }
+  }
+
+  disposeModel();
+  currentModel = cache[key].clone();
+  currentModel.traverse(c => {
+    if (c.isMesh) {
+      c.castShadow = true; c.receiveShadow = true;
+      if (document.getElementById('tg-wire').checked) {
+        (Array.isArray(c.material)?c.material:[c.material]).forEach(m=>m.wireframe=true);
+      }
+    }
+  });
+
+  // Compute ground level from model surface & place shadow + ring
+  const box = new THREE.Box3().setFromObject(currentModel);
+  buildGroundElements(currentModel);
+
+  scene.add(currentModel);
+  currentKey = key;
+
+  camera.position.set(...lm.defaultCam.pos);
+  controls.target.set(...lm.defaultCam.tgt);
+  controls.update();
+
+  hidePhotoCard();
+  buildMarkers(lm);
+  buildPOIButtons(lm);
+  updateTopbar(key);
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('st-model').textContent = lm.name;
+  document.getElementById('st-poi').textContent = '—';
+
+  // Fade hint after first load
+  setTimeout(() => {
+    const hint = document.getElementById('hint');
+    if (hint) hint.style.opacity = '0';
+  }, 8000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UI BUILDERS
+// ═══════════════════════════════════════════════════════════
+
+function buildPOIButtons(lm) {
+  const list = document.getElementById('poi-list');
+  list.innerHTML = '';
+  lm.pois.forEach(poi => {
+    const btn = document.createElement('button');
+    btn.className = 'poi-btn'; btn.dataset.poi = poi.id;
+    btn.innerHTML = `<span class="poi-marker" style="background:${poi.color};color:${poi.color}"></span>${poi.label}`;
+    btn.addEventListener('click', () => selectPOI(poi));
+    list.appendChild(btn);
+  });
+}
+
+function updateTopbar(key) {
+  document.querySelectorAll('#topbar button').forEach(b => b.classList.toggle('active', b.dataset.model === key));
+}
+
+// Top bar clicks
+document.querySelectorAll('#topbar button').forEach(btn => {
+  btn.addEventListener('click', () => { if (btn.dataset.model !== currentKey) loadModel(btn.dataset.model); });
+});
+
+// View buttons
+document.getElementById('btn-overview').addEventListener('click', () => {
+  const v = LANDMARKS[currentKey].overview; animateCamera(v.pos, v.tgt);
+});
+document.getElementById('btn-front').addEventListener('click', () => {
+  const v = LANDMARKS[currentKey].front; animateCamera(v.pos, v.tgt);
+});
+document.getElementById('btn-top').addEventListener('click', () => {
+  const v = LANDMARKS[currentKey].top; animateCamera(v.pos, v.tgt);
+});
+
+// Toggles
+document.getElementById('tg-annot').addEventListener('change', function(){ showAnnotations = this.checked; });
+document.getElementById('tg-rotate').addEventListener('change', function(){ controls.autoRotate = this.checked; });
+document.getElementById('tg-wire').addEventListener('change', function(){
+  const wf = this.checked;
+  if (currentModel) currentModel.traverse(c => {
+    if (c.isMesh) (Array.isArray(c.material)?c.material:[c.material]).forEach(m=>m.wireframe=wf);
+  });
+});
+
+// Keyboard
+window.addEventListener('keydown', e => {
+  const keys = {'1':'piazza','2':'academic','3':'seaside','4':'atrium'};
+  if (keys[e.key] && document.activeElement===document.body) loadModel(keys[e.key]);
+  if (e.key==='r' && document.activeElement===document.body) {
+    const lm = LANDMARKS[currentKey]; animateCamera(lm.defaultCam.pos, lm.defaultCam.tgt);
+  }
+  if (e.key==='f' && document.activeElement===document.body) {
+    const v = LANDMARKS[currentKey].top; animateCamera(v.pos, v.tgt);
+  }
+});
+
+// Ctrl+Click → coordinate debug
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+window.addEventListener('click', e => {
+  if (!e.ctrlKey && !e.metaKey) return;
+  if (!currentModel) return;
+  mouse.x = (e.clientX/innerWidth)*2-1; mouse.y = -(e.clientY/innerHeight)*2+1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObject(currentModel, true);
+  if (hits.length > 0) {
+    const p = hits[0].point;
+    const msg = `📍 [${p.x.toFixed(0)}, ${p.y.toFixed(0)}, ${p.z.toFixed(0)}]`;
+    console.log(msg);
+    const tip = document.createElement('div');
+    tip.style.cssText = `position:fixed;z-index:200;left:${e.clientX+12}px;top:${e.clientY-22}px;background:rgba(22,24,30,0.9);color:#e5c07b;padding:5px 12px;border-radius:7px;font-size:12px;pointer-events:none;font-family:monospace;border:1px solid rgba(229,192,123,0.4);backdrop-filter:blur(8px);`;
+    tip.textContent = msg; document.body.appendChild(tip);
+    setTimeout(() => tip.remove(), 2200);
+  }
+});
+
+// Resize
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER LOOP
+// ═══════════════════════════════════════════════════════════
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  updateMarkerPositions();
+  renderer.render(scene, camera);
+}
+
+// Init
+loadModel('piazza').then(() => animate());
+console.log('🏫 HKUST 3D Campus Viewer');
+console.log('  Ctrl+Click → 3D坐标 | 1-4 切换 | R 重置');
+</script>
+</body>
+</html>

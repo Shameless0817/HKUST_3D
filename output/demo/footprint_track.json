@@ -1,0 +1,25 @@
+{
+  "file": "hkust_seaside.glb",
+  "landmark": "track",
+  "origin": [
+    -41.37396240234375,
+    8.978647232055664
+  ],
+  "resolution": 0.5,
+  "grid_shape": [
+    53,
+    146
+  ],
+  "num_contours": 1,
+  "ellipse": {
+    "center_world": [
+      2.1979904174804688,
+      22.741605758666992
+    ],
+    "axes_world": [
+      12.948630332946777,
+      82.66883087158203
+    ],
+    "angle_deg": 103.09260559082031
+  }
+}

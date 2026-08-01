@@ -1,0 +1,8 @@
+{
+  "landsd_api_key": "YOUR_LANDSD_API_KEY_HERE",
+  "google_maps_api_key": "YOUR_GOOGLE_API_KEY_HERE",
+  "_instructions": {
+    "landsd_api_key": "发送邮件至 3dmap@landsd.gov.hk 申请。参考 email_template.md",
+    "google_maps_api_key": "在 https://console.cloud.google.com 创建项目，启用 Map Tiles API 后生成"
+  }
+}

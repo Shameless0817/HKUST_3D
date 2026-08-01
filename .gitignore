@@ -1,0 +1,40 @@
+# ── Generated output (large files, can be regenerated) ──
+output/demo/*.glb
+output/demo/voxel_campus.json
+output/demo/voxel_coastline.json
+output/demo/voxel_*_segmented.json
+output/demo/hkust_*.glb
+output/demo/hkust_*.geojson
+output/demo/hkust_*.geojson.state
+output/demo/*.npy
+
+# ── Raw data archives ──
+output/google_earth/
+output/csdi/
+output/google_3dtiles/
+output/processed/
+
+# ── External tools ──
+tools/
+
+# ── Python ──
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# ── Sensitive config ──
+config/api_keys.json
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ── IDE ──
+.vscode/
+.idea/

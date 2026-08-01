@@ -1,0 +1,866 @@
+[
+  {
+    "name": "邵氏大樓 Shaw House",
+    "class": null,
+    "floors": 0,
+    "marker_x": -8.166702067591658,
+    "marker_y": -48.07790446354423,
+    "marker_z": 85.1442965736358
+  },
+  {
+    "name": "李達三葉耀珍伉儷李本俊會議大樓 Li Dak Sum Yip Yio Chin Kenneth Li Conference Lodge",
+    "class": null,
+    "floors": 0,
+    "marker_x": 32.14205128022327,
+    "marker_y": -42.633221869081275,
+    "marker_z": 121.02040859569402
+  },
+  {
+    "name": "香港科技大學賽馬會高等研究院盧家驄薈萃樓 HKUST Jockey Club Institute for Advanced Study Lo Ka Chung Building",
+    "class": null,
+    "floors": 0,
+    "marker_x": 29.399560431986842,
+    "marker_y": -37.037956282631754,
+    "marker_z": 121.14121319240532
+  },
+  {
+    "name": "高級教職員宿舍第十七座 Senior Staff Quarters Block 17",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": 47.04301035503711,
+    "marker_y": -28.539988155684256,
+    "marker_z": 120.1415227994324
+  },
+  {
+    "name": "大疆創新樓（學生宿舍第十一座） DJI Hall (UG Hall XI)",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 31.114299201102952,
+    "marker_y": -29.177723087093167,
+    "marker_z": 117.68714057459941
+  },
+  {
+    "name": "高級教職員宿舍第十九座 Senior Staff Quarters Block 19",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": 49.221618231590185,
+    "marker_y": -33.40077827193445,
+    "marker_z": 120.30455309494869
+  },
+  {
+    "name": "學生宿舍第十三座 Undergraduate Hall XIII",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 38.83314995713404,
+    "marker_y": -31.82697179181831,
+    "marker_z": 121.0330362242327
+  },
+  {
+    "name": "學生宿舍第十二座 Undergraduate Hall XII",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 34.9615293939238,
+    "marker_y": -32.41760531855515,
+    "marker_z": 121.34807207054372
+  },
+  {
+    "name": "高級教職員宿舍第十八座 Senior Staff Quarters Block 18",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": 48.168281837266264,
+    "marker_y": -31.463299352346723,
+    "marker_z": 120.30856836581349
+  },
+  {
+    "name": "李兆基商學大樓 Lee Shau Kee Business Building",
+    "class": "university",
+    "floors": 0,
+    "marker_x": 12.951234941319228,
+    "marker_y": -31.50507607594414,
+    "marker_z": 75.56453984674226
+  },
+  {
+    "name": "學生宿舍第十座 Undergraduate Hall X",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 23.100814676333982,
+    "marker_y": -32.57774967865497,
+    "marker_z": 97.67188834242816
+  },
+  {
+    "name": "黃焯書科研中心 Wong Check She Research Center for Environment and Infrastructure",
+    "class": null,
+    "floors": 0,
+    "marker_x": -14.760166908782502,
+    "marker_y": -28.944478788429482,
+    "marker_z": 41.03848685174414
+  },
+  {
+    "name": "逸夫演藝中心 Shaw Auditorium",
+    "class": null,
+    "floors": 0,
+    "marker_x": -6.3354389619707945,
+    "marker_y": -27.163963914678412,
+    "marker_z": 47.81089166608115
+  },
+  {
+    "name": "賽馬會集賢樓 The Jockey Club Global Graduate Tower",
+    "class": "dormitory",
+    "floors": 8,
+    "marker_x": 24.022420700480254,
+    "marker_y": -26.38742088011715,
+    "marker_z": 90.82275203379731
+  },
+  {
+    "name": "Riftswood",
+    "class": "house",
+    "floors": 0,
+    "marker_x": -31.21518387089536,
+    "marker_y": -25.446377044278474,
+    "marker_z": 23.2165198980983
+  },
+  {
+    "name": "第18座 Tower 18",
+    "class": "apartments",
+    "floors": 7,
+    "marker_x": -41.45107739658322,
+    "marker_y": -22.66569494605318,
+    "marker_z": 27.251147222793662
+  },
+  {
+    "name": "第17座 Tower 17",
+    "class": "apartments",
+    "floors": 7,
+    "marker_x": -38.047937776054304,
+    "marker_y": -22.767258933758434,
+    "marker_z": 30.569949175359156
+  },
+  {
+    "name": "高級教職員宿舍第十三座 Senior Staff Quarters Block 13",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": 36.970280489147356,
+    "marker_y": -24.78660081770357,
+    "marker_z": 105.31990726966889
+  },
+  {
+    "name": "高級教職員宿舍第十五座 Senior Staff Quarters Block 15",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": 45.87401512243429,
+    "marker_y": -24.18834228978595,
+    "marker_z": 112.79472665877584
+  },
+  {
+    "name": "高級教職員宿舍第十二座 Senior Staff Quarters Block 12",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": 33.86409819427902,
+    "marker_y": -24.125085874390212,
+    "marker_z": 92.54985123852818
+  },
+  {
+    "name": "高級教職員宿舍第十四座 Senior Staff Quarters Block 14",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": 40.018728886926624,
+    "marker_y": -25.96520145972153,
+    "marker_z": 115.73601589215183
+  },
+  {
+    "name": "高級教職員宿舍第十六座 Senior Staff Quarters Block 16",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": 46.67691754635938,
+    "marker_y": -26.35521481235373,
+    "marker_z": 118.89717734817097
+  },
+  {
+    "name": "教職員宿舍第11座 Staff Quarters Tower 11",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 31.72491082743194,
+    "marker_y": -20.46706727782192,
+    "marker_z": 78.05634643711305
+  },
+  {
+    "name": "教職員宿舍第10座 Staff Quarters Tower 10",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 27.94650520929727,
+    "marker_y": -20.411967678317318,
+    "marker_z": 68.34125518038019
+  },
+  {
+    "name": "鄭裕彤樓 Cheng Yu Tung Building",
+    "class": "university",
+    "floors": 0,
+    "marker_x": -4.856854153672586,
+    "marker_y": -19.3151567387631,
+    "marker_z": 43.41706092620318
+  },
+  {
+    "name": "教職員宿舍第9座 Staff Quarters Tower 9",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 24.906703749517717,
+    "marker_y": -20.838181854529196,
+    "marker_z": 67.80295028129522
+  },
+  {
+    "name": "教職員宿舍第8座 Staff Quarters Tower 8",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 21.70302215384936,
+    "marker_y": -21.533344947508027,
+    "marker_z": 69.95680609270532
+  },
+  {
+    "name": "大學宿舍A座 University Apartments Tower A",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 10.301832532746886,
+    "marker_y": -22.088951495422485,
+    "marker_z": 64.83682442047883
+  },
+  {
+    "name": "街喉抽水站 Street Hydrant Pumping Station",
+    "class": "service",
+    "floors": 0,
+    "marker_x": 3.6773931034844907,
+    "marker_y": -21.005576358900008,
+    "marker_z": 53.21535318477875
+  },
+  {
+    "name": "第19座 Tower 19",
+    "class": "apartments",
+    "floors": 7,
+    "marker_x": -44.240142032109254,
+    "marker_y": -21.162899213090753,
+    "marker_z": 12.279475627068887
+  },
+  {
+    "name": "第16座 Tower 16",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -32.32303363704964,
+    "marker_y": -21.492958949455193,
+    "marker_z": 37.35583512219031
+  },
+  {
+    "name": "第20座 Tower 20",
+    "class": "apartments",
+    "floors": 7,
+    "marker_x": -46.13283360505072,
+    "marker_y": -19.211161671294256,
+    "marker_z": 0.7223335378945208
+  },
+  {
+    "name": "第15座 Tower 15",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -31.234546517898217,
+    "marker_y": -18.84247319613982,
+    "marker_z": 36.592097916660734
+  },
+  {
+    "name": "大學宿舍B座 University Apartments Tower B",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 12.343115298527621,
+    "marker_y": -17.210110772728584,
+    "marker_z": 60.51901954497289
+  },
+  {
+    "name": "第21座 Tower 21",
+    "class": "apartments",
+    "floors": 7,
+    "marker_x": -47.39008624095437,
+    "marker_y": -17.07359744633731,
+    "marker_z": -4.500096826815543
+  },
+  {
+    "name": "D座 Block D",
+    "class": "apartments",
+    "floors": 5,
+    "marker_x": -38.149311320671266,
+    "marker_y": -16.44445868152721,
+    "marker_z": 15.807311199216345
+  },
+  {
+    "name": "第12座 Tower 12",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -30.681091053715107,
+    "marker_y": -16.112112913349215,
+    "marker_z": 34.253292513525665
+  },
+  {
+    "name": "風水亭 Fung Shui Pavilion",
+    "class": null,
+    "floors": 0,
+    "marker_x": 21.38747030269205,
+    "marker_y": -14.713896297870392,
+    "marker_z": 63.400352796465484
+  },
+  {
+    "name": "香港賽馬會創新科技中心 The Hong Kong Jockey Club Enterprise Center",
+    "class": null,
+    "floors": 0,
+    "marker_x": -3.0068803895722738,
+    "marker_y": -15.168471962937296,
+    "marker_z": 38.35842688710477
+  },
+  {
+    "name": "液態氦機房 Liquid Helium Plant Room",
+    "class": "service",
+    "floors": 0,
+    "marker_x": -8.905433286779058,
+    "marker_y": -13.910214936609805,
+    "marker_z": 28.150850790960103
+  },
+  {
+    "name": "大學宿舍D座 University Apartments Tower D",
+    "class": null,
+    "floors": 0,
+    "marker_x": 15.81804807253188,
+    "marker_y": -14.100458456093499,
+    "marker_z": 54.690944596534024
+  },
+  {
+    "name": "第11座 Tower 11",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -30.58540724763138,
+    "marker_y": -13.359801082067548,
+    "marker_z": 30.53562729886706
+  },
+  {
+    "name": "F座 Block F",
+    "class": "apartments",
+    "floors": 5,
+    "marker_x": -44.8773369049983,
+    "marker_y": -10.562158523496464,
+    "marker_z": -15.209291500280585
+  },
+  {
+    "name": "第10座 Tower 10",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -30.749354947581963,
+    "marker_y": -10.740634488329349,
+    "marker_z": 25.400127094534472
+  },
+  {
+    "name": "羅桂祥樓 Lo Kwee-Seong Building",
+    "class": "university",
+    "floors": 0,
+    "marker_x": -13.355937970263739,
+    "marker_y": -10.358198990831731,
+    "marker_z": 22.180504426584683
+  },
+  {
+    "name": "大學宿舍C座 University Apartments Tower C",
+    "class": null,
+    "floors": 0,
+    "marker_x": 13.594199004672163,
+    "marker_y": -11.515216100716223,
+    "marker_z": 49.9244336483892
+  },
+  {
+    "name": "新翼大樓 Annex Building",
+    "class": "university",
+    "floors": 0,
+    "marker_x": 0.39878095808275305,
+    "marker_y": -12.457192217473192,
+    "marker_z": 38.12018316410031
+  },
+  {
+    "name": "盧家驄大學中心 Lo Ka Chung University Center",
+    "class": null,
+    "floors": 0,
+    "marker_x": 14.723628960164035,
+    "marker_y": -12.687873956428902,
+    "marker_z": 52.83372643000081
+  },
+  {
+    "name": "學生宿舍第八座 Undergraduate Hall VIII",
+    "class": "dormitory",
+    "floors": 8,
+    "marker_x": 47.46583223860466,
+    "marker_y": -6.008705332657442,
+    "marker_z": 90.41810088078174
+  },
+  {
+    "name": "學生宿舍第九座 Undergraduate Hall IX",
+    "class": "dormitory",
+    "floors": 8,
+    "marker_x": 57.75313141360269,
+    "marker_y": -6.99154771338393,
+    "marker_z": 114.16508527326067
+  },
+  {
+    "name": "E座 Block E",
+    "class": "apartments",
+    "floors": 5,
+    "marker_x": -40.065304160519645,
+    "marker_y": -9.530822045773135,
+    "marker_z": -10.984623863104005
+  },
+  {
+    "name": "第9座 Tower 9",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -31.164952519766423,
+    "marker_y": -8.001472102383879,
+    "marker_z": 20.97692333236497
+  },
+  {
+    "name": "第8座 Tower 8",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -32.58770622807557,
+    "marker_y": -4.71538038867395,
+    "marker_z": -2.3764815924215412
+  },
+  {
+    "name": "第7座 Tower 7",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -33.6628217155683,
+    "marker_y": -2.1011120915336434,
+    "marker_z": -5.403701336178205
+  },
+  {
+    "name": "第6座 Tower 6",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -34.82023626808275,
+    "marker_y": 0.7802589053169129,
+    "marker_z": -9.21468353617998
+  },
+  {
+    "name": "學術大樓 Academic Building",
+    "class": "university",
+    "floors": 7,
+    "marker_x": -3.7001718538359967,
+    "marker_y": 0.47698168471833213,
+    "marker_z": 25.989160879427743
+  },
+  {
+    "name": "學生宿舍第六座 Undergraduate Hall VI",
+    "class": "dormitory",
+    "floors": 12,
+    "marker_x": 34.147251481203625,
+    "marker_y": -0.4305538582450339,
+    "marker_z": 76.6968464259852
+  },
+  {
+    "name": "學生宿舍第四座 Undergraduate Hall IV",
+    "class": "dormitory",
+    "floors": 8,
+    "marker_x": 41.401757019454834,
+    "marker_y": -1.2373070502388757,
+    "marker_z": 76.31866810411091
+  },
+  {
+    "name": "海岸海洋實驗室 Coastal Marine Laboratory",
+    "class": null,
+    "floors": 5,
+    "marker_x": 43.31842562001749,
+    "marker_y": 8.475682089991132,
+    "marker_z": 48.72394988400071
+  },
+  {
+    "name": "水上活動中心 Water Sports Center",
+    "class": null,
+    "floors": 0,
+    "marker_x": 66.74730153797938,
+    "marker_y": 6.231090012435956,
+    "marker_z": 68.79911800484153
+  },
+  {
+    "name": "學生宿舍第二座 Undergraduate Hall II",
+    "class": null,
+    "floors": 0,
+    "marker_x": 32.62610737109793,
+    "marker_y": 4.114695309515625,
+    "marker_z": 36.965800110348006
+  },
+  {
+    "name": "學生宿舍第一座 Undergraduate Hall I",
+    "class": "university",
+    "floors": 0,
+    "marker_x": 21.077106765687233,
+    "marker_y": 4.169153168408229,
+    "marker_z": 26.16129953999648
+  },
+  {
+    "name": "第5座 Tower 5",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -35.9980124438143,
+    "marker_y": 3.2855013567909808,
+    "marker_z": -13.06469666661172
+  },
+  {
+    "name": "溫氏家祠 Wan's Ancestral Hall",
+    "class": "house",
+    "floors": 0,
+    "marker_x": -48.920930416099054,
+    "marker_y": 4.652499584749833,
+    "marker_z": -49.46327662729284
+  },
+  {
+    "name": "第3座 Tower 3",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -37.758291961167735,
+    "marker_y": 7.8237442700298985,
+    "marker_z": -19.758088958508463
+  },
+  {
+    "name": "長者中心 Elderly Centre",
+    "class": "house",
+    "floors": 2,
+    "marker_x": -60.45677619993343,
+    "marker_y": 6.884426309592584,
+    "marker_z": -67.87347259521485
+  },
+  {
+    "name": "大埔仔村青年中心 Tai Po Tsai Youth Centre",
+    "class": "house",
+    "floors": 2,
+    "marker_x": -60.414083786826005,
+    "marker_y": 5.493226912872565,
+    "marker_z": -67.87347259521485
+  },
+  {
+    "name": "大埔仔村公所 Tai Po Tsai Village Rural Committee",
+    "class": null,
+    "floors": 3,
+    "marker_x": -58.31072007821069,
+    "marker_y": 2.981698099883104,
+    "marker_z": -55.21205354272234
+  },
+  {
+    "name": "溫氏家祠 Wan's Ancestral Hall",
+    "class": "house",
+    "floors": 0,
+    "marker_x": -52.14496996803494,
+    "marker_y": -0.10824552628785256,
+    "marker_z": -46.723281423027004
+  },
+  {
+    "name": "碧水新村互助委員會 Pik Shui Sun Tsuen MAC",
+    "class": "house",
+    "floors": 2,
+    "marker_x": -57.14303175621341,
+    "marker_y": 37.831889163646366,
+    "marker_z": -67.87347259521485
+  },
+  {
+    "name": "Seawater Intake Head",
+    "class": "service",
+    "floors": 0,
+    "marker_x": 61.36051855215996,
+    "marker_y": 22.37503981147799,
+    "marker_z": 34.69913875274132
+  },
+  {
+    "name": "教職員宿舍第3座 Staff Quarters Tower 3",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 5.512485358169499,
+    "marker_y": 21.489273330342485,
+    "marker_z": -23.333758894933993
+  },
+  {
+    "name": "A座 Block A",
+    "class": "apartments",
+    "floors": 5,
+    "marker_x": -43.71368042423457,
+    "marker_y": 19.93821285671703,
+    "marker_z": -52.19509099809095
+  },
+  {
+    "name": "B座 Block B",
+    "class": "apartments",
+    "floors": 5,
+    "marker_x": -50.58978485203501,
+    "marker_y": 20.912716074601192,
+    "marker_z": -59.473472595214844
+  },
+  {
+    "name": "教職員宿舍一座 Staff Quarters Tower 1",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": -15.383470492567696,
+    "marker_y": 24.537934373878898,
+    "marker_z": -65.32518548723124
+  },
+  {
+    "name": "宿舍樓一至十二號 Apartments 1-12",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": -49.95383269111406,
+    "marker_y": 26.89621663742156,
+    "marker_z": -65.94437844647432
+  },
+  {
+    "name": "校長宿舍 President's Lodge",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": -4.515808487370208,
+    "marker_y": 27.353901931947846,
+    "marker_z": -39.26327420749007
+  },
+  {
+    "name": "教職員宿舍二座 Staff Quarters Tower 2",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": -11.145683780134618,
+    "marker_y": 26.314064482130277,
+    "marker_z": -49.201608356717244
+  },
+  {
+    "name": "宿舍樓三十七至四十八號 Apartments 37-48",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": -49.32636121738199,
+    "marker_y": 30.091748909753278,
+    "marker_z": -61.394548418679875
+  },
+  {
+    "name": "宿舍樓二十五至三十六號 Apartments 25-36",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": -56.863548923473054,
+    "marker_y": 27.656084648355616,
+    "marker_z": -68.67347259521485
+  },
+  {
+    "name": "宿舍樓十三至二十四號 Apartments 13-24",
+    "class": "residential",
+    "floors": 0,
+    "marker_x": -53.49811616541917,
+    "marker_y": 27.310293183943557,
+    "marker_z": -68.67347259521485
+  },
+  {
+    "name": "職員宿舍D座 Staff Quarters Block D",
+    "class": "apartments",
+    "floors": 0,
+    "marker_x": -69.44991042619068,
+    "marker_y": 22.017673453213646,
+    "marker_z": -68.67347259521485
+  },
+  {
+    "name": "職員宿舍C座 Staff Quarters Block C",
+    "class": "apartments",
+    "floors": 0,
+    "marker_x": -72.57687556265648,
+    "marker_y": 20.203587783543284,
+    "marker_z": -68.67347259521485
+  },
+  {
+    "name": "第25座 Tower 25",
+    "class": "apartments",
+    "floors": 5,
+    "marker_x": -52.36943363522758,
+    "marker_y": 18.106334770059803,
+    "marker_z": -59.473472595214844
+  },
+  {
+    "name": "職員宿舍B座 Staff Quarters Block B",
+    "class": "apartments",
+    "floors": 0,
+    "marker_x": -76.0262644193212,
+    "marker_y": 18.02081312264646,
+    "marker_z": -68.67347259521485
+  },
+  {
+    "name": "職員宿舍A座 Staff Quarters Block A",
+    "class": "apartments",
+    "floors": 0,
+    "marker_x": -73.47095972940052,
+    "marker_y": 16.250387991416105,
+    "marker_z": -68.67347259521485
+  },
+  {
+    "name": "溫家庄2號 2 Wan's Lodge",
+    "class": "house",
+    "floors": 3,
+    "marker_x": -51.72490711794886,
+    "marker_y": 15.869939761833223,
+    "marker_z": -65.07347259521484
+  },
+  {
+    "name": "溫家庄1號 1 Wan's Lodge",
+    "class": "house",
+    "floors": 3,
+    "marker_x": -52.87124923333826,
+    "marker_y": 15.729352828071242,
+    "marker_z": -65.07347259521482
+  },
+  {
+    "name": "House 1",
+    "class": "house",
+    "floors": 0,
+    "marker_x": -57.5689394009251,
+    "marker_y": 15.291699590782699,
+    "marker_z": -68.67347259521483
+  },
+  {
+    "name": "House 2",
+    "class": "house",
+    "floors": 0,
+    "marker_x": -55.472691094536486,
+    "marker_y": 15.350728638761424,
+    "marker_z": -68.67347259521485
+  },
+  {
+    "name": "溫家庄4號 4 Wan's Lodge",
+    "class": "house",
+    "floors": 3,
+    "marker_x": -51.84990666332489,
+    "marker_y": 14.938922440220068,
+    "marker_z": -65.07347259521484
+  },
+  {
+    "name": "溫家庄3號 3 Wan's Lodge",
+    "class": "house",
+    "floors": 3,
+    "marker_x": -52.69285593584364,
+    "marker_y": 14.883560877492812,
+    "marker_z": -65.07347259521484
+  },
+  {
+    "name": "House 3",
+    "class": "house",
+    "floors": 0,
+    "marker_x": -56.71280404593243,
+    "marker_y": 14.625789058564735,
+    "marker_z": -68.67347259521485
+  },
+  {
+    "name": "House 5",
+    "class": "house",
+    "floors": 0,
+    "marker_x": -55.95069364814873,
+    "marker_y": 13.933682203276973,
+    "marker_z": -68.67347259521485
+  },
+  {
+    "name": "第22座 Tower 22",
+    "class": "apartments",
+    "floors": 5,
+    "marker_x": -41.91734760909784,
+    "marker_y": 8.344028570335588,
+    "marker_z": -33.51200567663642
+  },
+  {
+    "name": "第2座 Tower 2",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -38.26619650125052,
+    "marker_y": 10.304219066426953,
+    "marker_z": -22.567848062003694
+  },
+  {
+    "name": "研究生宿舍第二座 (學生宿舍第五座) PG Hall II (UG Hall V)",
+    "class": null,
+    "floors": 6,
+    "marker_x": 15.036945829280683,
+    "marker_y": 9.739286187228643,
+    "marker_z": 21.663026912393793
+  },
+  {
+    "name": "張鑑泉樓（研究生宿舍一座） Stephen Kam Chuen Cheong Hall (PG Hall I)",
+    "class": "dormitory",
+    "floors": 8,
+    "marker_x": 20.76533040443023,
+    "marker_y": 7.682746413550262,
+    "marker_z": 34.81443610810847
+  },
+  {
+    "name": "陳瑞球林滿珍伉儷樓（學生宿舍第七座） Chan Sui Kau and Chan Lam Moon Chun Hall (UG Hall VII)",
+    "class": "dormitory",
+    "floors": 9,
+    "marker_x": 29.408021523096224,
+    "marker_y": 8.033062308268192,
+    "marker_z": 43.85545052375994
+  },
+  {
+    "name": "圖書館新翼 Library Extension",
+    "class": null,
+    "floors": 0,
+    "marker_x": 0.9185048175293957,
+    "marker_y": 13.425273944851426,
+    "marker_z": -13.007767729180763
+  },
+  {
+    "name": "第23座 Tower 23",
+    "class": "apartments",
+    "floors": 5,
+    "marker_x": -43.049050251764356,
+    "marker_y": 11.255834747501737,
+    "marker_z": -39.95651630449482
+  },
+  {
+    "name": "第1座 Tower 1",
+    "class": "apartments",
+    "floors": 8,
+    "marker_x": -38.26266784259899,
+    "marker_y": 12.496901204432135,
+    "marker_z": -24.963475586125117
+  },
+  {
+    "name": "溫氏家祠 Wan's Ancestral Hall",
+    "class": "house",
+    "floors": 1,
+    "marker_x": -50.92721970928443,
+    "marker_y": 14.720619748044868,
+    "marker_z": -69.47347259521486
+  },
+  {
+    "name": "香港科技大學多層停車場 HKUST Multi-storey Car Park",
+    "class": "parking",
+    "floors": 0,
+    "marker_x": -11.993242534442814,
+    "marker_y": 14.540010654048743,
+    "marker_z": -27.955004706581487
+  },
+  {
+    "name": "學生宿舍第三座 Undergraduate Hall III",
+    "class": "dormitory",
+    "floors": 8,
+    "marker_x": 23.627074903963717,
+    "marker_y": 15.771566873879408,
+    "marker_z": 23.958315825782197
+  },
+  {
+    "name": "教職員宿舍第5-7座 Senior Staff Quarters Tower 5-7",
+    "class": "dormitory",
+    "floors": 12,
+    "marker_x": 16.50027961010737,
+    "marker_y": 16.23304990648623,
+    "marker_z": 26.63260176441238
+  },
+  {
+    "name": "C座 Block C",
+    "class": "apartments",
+    "floors": 4,
+    "marker_x": -43.82300924822155,
+    "marker_y": 15.26625173409623,
+    "marker_z": -55.77792768813251
+  },
+  {
+    "name": "教職員宿舍第4座 Staff Quarters Tower 4",
+    "class": "dormitory",
+    "floors": 0,
+    "marker_x": 8.0374226631603,
+    "marker_y": 19.082904997775003,
+    "marker_z": -17.738020985606532
+  }
+]
