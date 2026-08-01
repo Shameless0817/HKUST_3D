@@ -1,11 +1,8 @@
 """
 Capture demo screenshots of HKUST voxel landmarks using Playwright.
-Reads directly from the WebGL canvas (bypasses browser compositor)
-to avoid inconsistent SwiftShader Y-axis flipping.
 Usage: python3 scripts/screenshots.py
 """
 import asyncio
-import base64
 import os
 from pathlib import Path
 from playwright.async_api import async_playwright
@@ -47,12 +44,8 @@ async def capture():
     async with async_playwright() as p:
         browser = await p.chromium.launch(
             headless=True,
-            args=[
-                "--use-gl=swiftshader",
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-            ],
+            args=["--use-gl=swiftshader", "--no-sandbox",
+                  "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
         )
         page = await browser.new_page(viewport={"width": 1920, "height": 1080})
 
@@ -71,58 +64,44 @@ async def capture():
             print(f"\n📸 [{i+1}/{len(SHOTS)}] {label} ({landmark}) ...")
 
             try:
-                # Click landmark button
-                await page.evaluate(f"""
-                    document.querySelector('#topbar button[data-model="{landmark}"]').click();
-                """)
-
-                # Wait for loading to finish
+                # Load landmark
+                await page.evaluate(
+                    f"""document.querySelector(
+                        '#topbar button[data-model=\"{landmark}\"]').click()""")
                 try:
                     await page.wait_for_function(
-                        """document.getElementById('loading').classList.contains('hidden')""",
-                        timeout=120000,
-                    )
+                        "document.getElementById('loading').classList.contains('hidden')",
+                        timeout=120000)
                 except Exception:
                     print(f"  ⚠️ Loading timeout, waiting 30s...")
                     await asyncio.sleep(30)
 
                 await asyncio.sleep(4.0)
 
-                # Move camera to front-facing angle
-                await page.evaluate(f"animateCamera({cam_pos}, {cam_tgt}, 1500);")
+                # Position camera
+                await page.evaluate(
+                    f"animateCamera({cam_pos}, {cam_tgt}, 1500);")
                 await asyncio.sleep(2.5)
 
-                # Hide UI elements
+                # Hide UI
                 await page.evaluate("""
-                    for (const id of ['infobar', 'panel', 'hint', 'topbar']) {
+                    for (const id of ['infobar','panel','hint','topbar']) {
                         const el = document.getElementById(id);
                         if (el) el.style.display = 'none';
                     }
-                    for (const el of document.querySelectorAll('.marker-dot')) {
+                    for (const el of document.querySelectorAll('.marker-dot'))
                         el.style.display = 'none';
-                    }
                 """)
                 await asyncio.sleep(0.5)
 
-                # Read directly from WebGL canvas via toDataURL().
-                # This bypasses the browser compositor that caused
-                # inconsistent Y-flip with page.screenshot().
-                # toDataURL() internally handles the WebGL framebuffer
-                # bottom-left → PNG top-left conversion correctly.
                 out_path = SCREENSHOTS_DIR / f"{name}.png"
-                data_url = await page.evaluate("""
-                    document.querySelector('canvas').toDataURL('image/png');
-                """)
-                _, encoded = data_url.split(",", 1)
-                img_data = base64.b64decode(encoded)
-                with open(out_path, "wb") as f:
-                    f.write(img_data)
+                await page.screenshot(path=str(out_path), timeout=60000)
 
                 size_kb = os.path.getsize(out_path) / 1024
                 print(f"  ✅ Saved: {out_path.name} ({size_kb:.0f} KB)")
                 success += 1
 
-                # Restore UI for next shot
+                # Restore UI
                 await page.evaluate("""
                     for (const id of ['infobar', 'panel', 'topbar']) {
                         const el = document.getElementById(id);
@@ -132,15 +111,6 @@ async def capture():
 
             except Exception as e:
                 print(f"  ❌ Failed: {e}")
-                try:
-                    await page.evaluate("""
-                        for (const id of ['infobar', 'panel', 'topbar']) {
-                            const el = document.getElementById(id);
-                            if (el) el.style.display = '';
-                        }
-                    """)
-                except Exception:
-                    pass
 
         await browser.close()
         print(f"\n🎉 {success}/{len(SHOTS)} screenshots saved to: {SCREENSHOTS_DIR}/")
