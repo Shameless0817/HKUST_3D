@@ -498,6 +498,7 @@ function animateCamera(toPos, toTgt, duration = 1200) {
   }
   requestAnimationFrame(step);
 }
+window.animateCamera = animateCamera;  // expose for screenshot automation
 
 // ═══════════════════════════════════════════════════════════
 //  VOXEL LOADING
