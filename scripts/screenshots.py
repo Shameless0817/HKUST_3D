@@ -5,6 +5,7 @@ Usage: python3 scripts/screenshots.py
 import asyncio
 import os
 from pathlib import Path
+from PIL import Image, ImageOps
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -96,6 +97,13 @@ async def capture():
 
                 out_path = SCREENSHOTS_DIR / f"{name}.png"
                 await page.screenshot(path=str(out_path), timeout=60000)
+
+                # SwiftShader flips WebGL output for elevated cameras.
+                # Only the track (camera at ground level Z=15) renders correctly.
+                if landmark != "track":
+                    img = Image.open(out_path)
+                    img = ImageOps.flip(img)
+                    img.save(out_path)
 
                 size_kb = os.path.getsize(out_path) / 1024
                 print(f"  ✅ Saved: {out_path.name} ({size_kb:.0f} KB)")
