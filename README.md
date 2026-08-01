@@ -2,6 +2,25 @@
 
 > A Minecraft-style 3D voxel model of the HKUST Clear Water Bay campus, rendered in the browser with Three.js. 3.15 million hand-crafted voxels at 0.5m resolution across 14 landmarks.
 
+## 📸 Gallery
+
+<div align="center">
+  <img src="output/screenshots/01_plaza_sundial.png" alt="Red Bird Plaza" width="49%" />
+  <img src="output/screenshots/02_shaw_auditorium.png" alt="Shaw Auditorium" width="49%" />
+</div>
+
+<div align="center">
+  <img src="output/screenshots/03_academic_arc.png" alt="Academic Arc" width="49%" />
+  <img src="output/screenshots/05_north_gate.png" alt="North Gate" width="49%" />
+</div>
+
+<div align="center">
+  <img src="output/screenshots/08_student_halls.png" alt="Student Halls" width="49%" />
+  <img src="output/screenshots/09_track_field.png" alt="Track & Field" width="49%" />
+</div>
+
+<p align="center"><em>Red Bird Plaza · Shaw Auditorium · Academic Arc · North Gate · Student Halls · Track & Field</em></p>
+
 ## 🎥 Demo
 
 Open `output/demo/viewer_voxel.html` in any modern browser, or serve locally:
