@@ -1,110 +1,43 @@
 """
 Capture demo screenshots of HKUST voxel landmarks using Playwright.
-Fixes swiftshader Y-axis flip with PIL ImageOps.flip().
-Uses custom camera angles per landmark for best visual presentation.
+Reads directly from the WebGL canvas (bypasses browser compositor)
+to avoid inconsistent SwiftShader Y-axis flipping.
 Usage: python3 scripts/screenshots.py
 """
 import asyncio
+import base64
 import os
-import sys
 from pathlib import Path
-from PIL import Image, ImageOps
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
 SCREENSHOTS_DIR = ROOT / "output" / "screenshots"
 
-# Each shot: landmark key, filename, label, and custom camera [pos, tgt]
-# Camera pos/tgt are [X, Y, Z] in HKUST coords (Z=elevation).
-# Angles chosen for best visual presentation — lower/side angles where
-# buildings look 3D, higher angles for layouts (track, halls).
 SHOTS = [
-    # Using the viewer's built-in "front" camera presets —
-    # straight-on, eye-level views of each building's main facade.
-    {
-        "name": "01_plaza_sundial",
-        "landmark": "plaza",
-        "label": "Red Bird Plaza",
-        "cam_pos": [0, -30, 52],    # front: looking north from south
-        "cam_tgt": [0, -88, 44],
-    },
-    {
-        "name": "02_shaw_auditorium",
-        "landmark": "shaw",
-        "label": "Shaw Auditorium",
-        "cam_pos": [120, -140, 25], # front: looking south from north
-        "cam_tgt": [120, -190, 10],
-    },
-    {
-        "name": "03_academic_arc",
-        "landmark": "academic",
-        "label": "Academic Arc",
-        "cam_pos": [0, -50, 56],    # front: looking north at crescent facade
-        "cam_tgt": [0, 0, 56],
-    },
-    {
-        "name": "04_atrium",
-        "landmark": "atrium",
-        "label": "Jockey Club Atrium",
-        "cam_pos": [0, -95, 50],    # front: looking north at grand entrance
-        "cam_tgt": [0, -38, 48],
-    },
-    {
-        "name": "05_north_gate",
-        "landmark": "gate",
-        "label": "North Gate",
-        "cam_pos": [0, 100, 48],    # front: looking south at pillars
-        "cam_tgt": [0, 60, 42],
-    },
-    {
-        "name": "06_library",
-        "landmark": "library",
-        "label": "University Library",
-        "cam_pos": [40, -60, 52],   # front: looking north at library
-        "cam_tgt": [40, 10, 48],
-    },
-    {
-        "name": "07_lsk_business",
-        "landmark": "lsk",
-        "label": "LSK Business Building",
-        "cam_pos": [-50, -20, 52],  # front: looking south at LSK
-        "cam_tgt": [-50, -50, 44],
-    },
-    {
-        "name": "08_student_halls",
-        "landmark": "halls",
-        "label": "Student Halls",
-        "cam_pos": [65, -50, 40],   # front: looking south at residence towers
-        "cam_tgt": [65, -135, 20],
-    },
-    {
-        "name": "09_track_field",
-        "landmark": "track",
-        "label": "Sports Track & Field",
-        "cam_pos": [85, -220, 15],  # front: looking north at track
-        "cam_tgt": [85, -155, 2],
-    },
-    {
-        "name": "10_pool",
-        "landmark": "pool",
-        "label": "Swimming Pool",
-        "cam_pos": [85, -110, 16],  # front: looking south at pool
-        "cam_tgt": [85, -138, 8],
-    },
-    {
-        "name": "11_chinese_garden",
-        "landmark": "garden",
-        "label": "Chinese Garden",
-        "cam_pos": [-65, 60, 46],   # front: looking north at pavilion
-        "cam_tgt": [-65, 35, 40],
-    },
-    {
-        "name": "12_tianyi_spring",
-        "landmark": "spring",
-        "label": "Tianyi Spring",
-        "cam_pos": [0, -70, 42],    # front: looking north at fountain
-        "cam_tgt": [0, -55, 38],
-    },
+    {"name": "01_plaza_sundial",   "landmark": "plaza",    "label": "Red Bird Plaza",
+     "cam_pos": [0, -30, 52],    "cam_tgt": [0, -88, 44]},
+    {"name": "02_shaw_auditorium", "landmark": "shaw",     "label": "Shaw Auditorium",
+     "cam_pos": [120, -140, 25], "cam_tgt": [120, -190, 10]},
+    {"name": "03_academic_arc",    "landmark": "academic", "label": "Academic Arc",
+     "cam_pos": [0, -50, 56],    "cam_tgt": [0, 0, 56]},
+    {"name": "04_atrium",          "landmark": "atrium",   "label": "Jockey Club Atrium",
+     "cam_pos": [0, -95, 50],    "cam_tgt": [0, -38, 48]},
+    {"name": "05_north_gate",      "landmark": "gate",     "label": "North Gate",
+     "cam_pos": [0, 100, 48],    "cam_tgt": [0, 60, 42]},
+    {"name": "06_library",         "landmark": "library",  "label": "University Library",
+     "cam_pos": [40, -60, 52],   "cam_tgt": [40, 10, 48]},
+    {"name": "07_lsk_business",    "landmark": "lsk",      "label": "LSK Business Building",
+     "cam_pos": [-50, -20, 52],  "cam_tgt": [-50, -50, 44]},
+    {"name": "08_student_halls",   "landmark": "halls",    "label": "Student Halls",
+     "cam_pos": [65, -50, 40],   "cam_tgt": [65, -135, 20]},
+    {"name": "09_track_field",     "landmark": "track",    "label": "Sports Track & Field",
+     "cam_pos": [85, -220, 15],  "cam_tgt": [85, -155, 2]},
+    {"name": "10_pool",            "landmark": "pool",     "label": "Swimming Pool",
+     "cam_pos": [85, -110, 16],  "cam_tgt": [85, -138, 8]},
+    {"name": "11_chinese_garden",  "landmark": "garden",   "label": "Chinese Garden",
+     "cam_pos": [-65, 60, 46],   "cam_tgt": [-65, 35, 40]},
+    {"name": "12_tianyi_spring",   "landmark": "spring",   "label": "Tianyi Spring",
+     "cam_pos": [0, -70, 42],    "cam_tgt": [0, -55, 38]},
 ]
 
 
@@ -138,10 +71,9 @@ async def capture():
             print(f"\n📸 [{i+1}/{len(SHOTS)}] {label} ({landmark}) ...")
 
             try:
-                # Click landmark button via JS
+                # Click landmark button
                 await page.evaluate(f"""
-                    const btn = document.querySelector('#topbar button[data-model="{landmark}"]');
-                    if (btn) btn.click();
+                    document.querySelector('#topbar button[data-model="{landmark}"]').click();
                 """)
 
                 # Wait for loading to finish
@@ -154,16 +86,13 @@ async def capture():
                     print(f"  ⚠️ Loading timeout, waiting 30s...")
                     await asyncio.sleep(30)
 
-                # Let render settle
                 await asyncio.sleep(4.0)
 
-                # Move camera to custom angle via animateCamera()
-                await page.evaluate(f"""
-                    animateCamera({cam_pos}, {cam_tgt}, 1500);
-                """)
+                # Move camera to front-facing angle
+                await page.evaluate(f"animateCamera({cam_pos}, {cam_tgt}, 1500);")
                 await asyncio.sleep(2.5)
 
-                # Hide UI elements for clean screenshot
+                # Hide UI elements
                 await page.evaluate("""
                     for (const id of ['infobar', 'panel', 'hint', 'topbar']) {
                         const el = document.getElementById(id);
@@ -175,24 +104,19 @@ async def capture():
                 """)
                 await asyncio.sleep(0.5)
 
-                # Save screenshot
+                # Read directly from WebGL canvas via toDataURL().
+                # This bypasses the browser compositor that caused
+                # inconsistent Y-flip with page.screenshot().
+                # toDataURL() internally handles the WebGL framebuffer
+                # bottom-left → PNG top-left conversion correctly.
                 out_path = SCREENSHOTS_DIR / f"{name}.png"
-                await page.screenshot(path=str(out_path), full_page=False, timeout=60000)
-
-                # FIX: swiftshader WebGL Y-axis flip (auto-detect)
-                # SwiftShader inconsistently flips WebGL output. Detect by
-                # checking if scene content is in the top half (flipped) or
-                # bottom half (correct) and flip only when needed.
-                img = Image.open(out_path)
-                arr = __import__('numpy').array(img)
-                h = arr.shape[0]
-                dark_bg = __import__('numpy').array([13, 17, 23])
-                is_content = (__import__('numpy').abs(arr.astype(float) - dark_bg).max(axis=2) > 8)
-                content_top = is_content[:h//2, :].sum()
-                content_bot = is_content[h//2:, :].sum()
-                if content_top > content_bot:
-                    img = ImageOps.flip(img)
-                img.save(out_path)
+                data_url = await page.evaluate("""
+                    document.querySelector('canvas').toDataURL('image/png');
+                """)
+                _, encoded = data_url.split(",", 1)
+                img_data = base64.b64decode(encoded)
+                with open(out_path, "wb") as f:
+                    f.write(img_data)
 
                 size_kb = os.path.getsize(out_path) / 1024
                 print(f"  ✅ Saved: {out_path.name} ({size_kb:.0f} KB)")
