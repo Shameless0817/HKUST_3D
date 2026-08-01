@@ -179,16 +179,20 @@ async def capture():
                 out_path = SCREENSHOTS_DIR / f"{name}.png"
                 await page.screenshot(path=str(out_path), full_page=False, timeout=60000)
 
-                # FIX: swiftshader WebGL Y-axis flip (most landmarks)
-                # WebGL framebuffer origin is bottom-left but browser compositor
-                # expects top-left. SwiftShader doesn't handle this correctly for
-                # most camera angles. Exception: low-angle ground-level shots
-                # (track at Z=15) render correctly without flip.
-                NO_FLIP_LANDMARKS = {'track'}
-                if landmark not in NO_FLIP_LANDMARKS:
-                    img = Image.open(out_path)
+                # FIX: swiftshader WebGL Y-axis flip (auto-detect)
+                # SwiftShader inconsistently flips WebGL output. Detect by
+                # checking if scene content is in the top half (flipped) or
+                # bottom half (correct) and flip only when needed.
+                img = Image.open(out_path)
+                arr = __import__('numpy').array(img)
+                h = arr.shape[0]
+                dark_bg = __import__('numpy').array([13, 17, 23])
+                is_content = (__import__('numpy').abs(arr.astype(float) - dark_bg).max(axis=2) > 8)
+                content_top = is_content[:h//2, :].sum()
+                content_bot = is_content[h//2:, :].sum()
+                if content_top > content_bot:
                     img = ImageOps.flip(img)
-                    img.save(out_path)
+                img.save(out_path)
 
                 size_kb = os.path.getsize(out_path) / 1024
                 print(f"  ✅ Saved: {out_path.name} ({size_kb:.0f} KB)")
